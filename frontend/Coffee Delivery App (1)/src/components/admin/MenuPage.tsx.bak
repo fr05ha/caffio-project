@@ -1,0 +1,413 @@
+import { useState } from 'react';
+import { MenuItem } from '../../types';
+import { Card } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { Badge } from '../ui/badge';
+import { Switch } from '../ui/switch';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Plus, Pencil, Trash2, Image as ImageIcon } from 'lucide-react';
+import { ImageWithFallback } from '../figma/ImageWithFallback';
+import { toast } from 'sonner';
+import { MenuImageGallery } from './MenuImageGallery';ate } from 'react';
+import { MenuItem } from '../../types';
+import { Card } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { Badge } from '../ui/badge';
+import { Switch } from '../ui/switch';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Plus, Pencil, Trash2, Coffee, Image as ImageIcon } from 'lucide-react';
+import { ImageWithFallback } from '../figma/ImageWithFallback';
+import { toast } from 'sonner';
+
+// Predefined images for The Manly Club
+const manlyClubImages = {
+  food: [
+    { url: 'https://source.unsplash.com/featured/?burger', label: 'Burger' },
+    { url: 'https://source.unsplash.com/featured/?fish&chips', label: 'Fish & Chips' },
+    { url: 'https://source.unsplash.com/featured/?schnitzel', label: 'Schnitzel' },
+    { url: 'https://source.unsplash.com/featured/?steak', label: 'Steak' },
+    { url: 'https://source.unsplash.com/featured/?pizza', label: 'Pizza' },
+    { url: 'https://source.unsplash.com/featured/?wings', label: 'Wings' },
+  ],
+  drinks: [
+    { url: 'https://source.unsplash.com/featured/?cocktail', label: 'Cocktails' },
+    { url: 'https://source.unsplash.com/featured/?beer', label: 'Beer' },
+    { url: 'https://source.unsplash.com/featured/?wine', label: 'Wine' },
+    { url: 'https://source.unsplash.com/featured/?spirits', label: 'Spirits' },
+  ]
+};
+
+// Predefined images for Oh Matcha
+const ohMatchaImages = {
+  drinks: [
+    { url: 'https://static.wixstatic.com/media/f07ad2_79301eafd27942c7bb841249a67233d1~mv2.jpg', label: 'Matcha Latte' },
+    { url: 'https://static.wixstatic.com/media/f07ad2_f238e2db72c54a438459f96dfd326df7~mv2.png', label: 'Matcha Soft Serve' },
+    { url: 'https://static.wixstatic.com/media/f07ad2_39941167eaaf460696ad29175fb075b1~mv2.jpg', label: 'Iced Matcha' },
+  ],
+  food: [
+    { url: 'https://source.unsplash.com/featured/?japanese+dessert', label: 'Japanese Dessert' },
+    { url: 'https://source.unsplash.com/featured/?mochi', label: 'Mochi' },
+    { url: 'https://source.unsplash.com/featured/?matcha+cake', label: 'Matcha Cake' },
+  ]
+};
+
+// Remove unused predefined images (now in ImageGallery component)
+const ohMatchaImages = null;
+const manlyClubImages = null;
+
+export default function MenuPage() {
+  const [menu, setMenu] = useState<MenuItem[]>([
+    {
+      id: '1',
+      name: 'Matcha Latte',
+      description: 'Ceremonial grade matcha with steamed milk',
+      price: 5.50,
+      imageUrl: 'https://static.wixstatic.com/media/f07ad2_79301eafd27942c7bb841249a67233d1~mv2.jpg',
+      category: 'drinks',
+      available: true
+    }
+  ]);
+  const [isAddingItem, setIsAddingItem] = useState(false);
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [showImageGallery, setShowImageGallery] = useState(false);
+  const [currentBusiness] = useState<'ohMatcha' | 'manlyClub'>('ohMatcha');
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'food' | 'drinks'>('all');
+
+  const [formData, setFormData] = useState<MenuItem>({
+    name: '',
+    description: '',
+    price: '',
+    category: 'Coffee',
+    image: '',
+    available: true,
+  });
+
+  const categories = Array.from(new Set(menuItems.map(item => item.category)));
+  const filteredItems = categoryFilter === 'all' 
+    ? menuItems 
+    : menuItems.filter(item => item.category === categoryFilter);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.price) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    const itemData = {
+      name: formData.name,
+      description: formData.description,
+      price: parseFloat(formData.price),
+      category: formData.category,
+      image: formData.image || 'https://images.unsplash.com/photo-1485808191679-5f86510681a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3ByZXNzbyUyMGNvZmZlZXxlbnwxfHx8fDE3NjA3OTg4MDB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
+      available: formData.available,
+    };
+
+    if (editingItem) {
+      onUpdateItem(editingItem.id, itemData);
+      toast.success('Menu item updated successfully');
+      setEditingItem(null);
+    } else {
+      onAddItem(itemData);
+      toast.success('Menu item added successfully');
+      setIsAddDialogOpen(false);
+    }
+
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      category: 'Coffee',
+      image: '',
+      available: true,
+    });
+  };
+
+  const handleEdit = (item: MenuItem) => {
+    setEditingItem(item);
+    setFormData({
+      name: item.name,
+      description: item.description,
+      price: item.price.toString(),
+      category: item.category,
+      image: item.image,
+      available: item.available ?? true,
+    });
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    if (confirm(`Are you sure you want to delete "${name}"?`)) {
+      onDeleteItem(id);
+      toast.success('Menu item deleted');
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="mb-2">Menu Management</h1>
+          <p className="text-gray-600">Add, edit, and manage your menu items</p>
+        </div>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Menu Item
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Add New Menu Item</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g., Caramel Latte"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="price">Price ($) *</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    placeholder="5.50"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Coffee">Coffee</SelectItem>
+                    <SelectItem value="Iced">Iced</SelectItem>
+                    <SelectItem value="Food">Food</SelectItem>
+                    <SelectItem value="Dessert">Dessert</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Describe your menu item..."
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="image">Image URL</Label>
+                <Input
+                  id="image"
+                  value={formData.image}
+                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  placeholder="https://..."
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="available"
+                  checked={formData.available}
+                  onCheckedChange={(checked) => setFormData({ ...formData, available: checked })}
+                />
+                <Label htmlFor="available">Available for order</Label>
+              </div>
+
+              <div className="flex gap-2">
+                <Button type="submit" className="flex-1">Add Item</Button>
+                <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Filter */}
+      <Card className="p-4">
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Filter by category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map(category => (
+              <SelectItem key={category} value={category}>{category}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Card>
+
+      {/* Menu Items Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredItems.map((item) => (
+          <Card key={item.id} className="overflow-hidden">
+            <div className="relative h-48">
+              <ImageWithFallback
+                src={item.image}
+                alt={item.name}
+                className="w-full h-full object-cover"
+              />
+              {item.available === false && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <Badge variant="secondary">Unavailable</Badge>
+                </div>
+              )}
+            </div>
+            <div className="p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1">
+                  <h3 className="mb-1">{item.name}</h3>
+                  <Badge variant="outline" className="mb-2">{item.category}</Badge>
+                </div>
+                <p className="ml-2">${item.price.toFixed(2)}</p>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">{item.description}</p>
+              <div className="flex gap-2">
+                <Dialog open={editingItem?.id === item.id} onOpenChange={(open) => !open && setEditingItem(null)}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(item)}>
+                      <Pencil className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Edit Menu Item</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="edit-name">Name *</Label>
+                          <Input
+                            id="edit-name"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-price">Price ($) *</Label>
+                          <Input
+                            id="edit-price"
+                            type="number"
+                            step="0.01"
+                            value={formData.price}
+                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="edit-category">Category</Label>
+                        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Coffee">Coffee</SelectItem>
+                            <SelectItem value="Iced">Iced</SelectItem>
+                            <SelectItem value="Food">Food</SelectItem>
+                            <SelectItem value="Dessert">Dessert</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="edit-description">Description</Label>
+                        <Textarea
+                          id="edit-description"
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          className="mt-1"
+                          rows={3}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="edit-image">Image URL</Label>
+                        <Input
+                          id="edit-image"
+                          value={formData.image}
+                          onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                          className="mt-1"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id="edit-available"
+                          checked={formData.available}
+                          onCheckedChange={(checked) => setFormData({ ...formData, available: checked })}
+                        />
+                        <Label htmlFor="edit-available">Available for order</Label>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button type="submit" className="flex-1">Save Changes</Button>
+                        <Button type="button" variant="outline" onClick={() => setEditingItem(null)}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 hover:bg-red-50"
+                  onClick={() => handleDelete(item.id, item.name)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {filteredItems.length === 0 && (
+        <Card className="p-12 text-center">
+          <Coffee className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+          <h3 className="mb-2">No menu items found</h3>
+          <p className="text-gray-600 mb-4">Start by adding your first menu item</p>
+          <Button onClick={() => setIsAddDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Menu Item
+          </Button>
+        </Card>
+      )}
+    </div>
+  );
+}
