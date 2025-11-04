@@ -1,0 +1,66 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Cafe {
+  id           Int        @id @default(autoincrement())
+  name         String
+  address      String?
+  lat          Float
+  lon          Float
+  ratingAvg    Float      @default(0)
+  ratingCount  Int        @default(0)
+  isCertified  Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  // Customization fields
+  primaryColor   String?
+  secondaryColor String?
+  accentColor    String?
+  logoUrl        String?
+  theme          String?
+  menus        Menu[]
+  reviews      Review[]
+  user         User?
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  passwordHash String
+  cafeId       Int        @unique
+  cafe         Cafe       @relation(fields: [cafeId], references: [id])
+  createdAt    DateTime   @default(now())
+}
+
+model Menu {
+  id        Int        @id @default(autoincrement())
+  cafeId    Int
+  name      String     @default("Main")
+  isActive  Boolean    @default(true)
+  cafe      Cafe       @relation(fields: [cafeId], references: [id])
+  items     MenuItem[]
+}
+
+model MenuItem {
+  id          Int        @id @default(autoincrement())
+  menuId      Int
+  name        String
+  description String?
+  price       Float
+  currency    String     @default("AUD")
+  menu        Menu       @relation(fields: [menuId], references: [id])
+}
+
+model Review {
+  id        Int        @id @default(autoincrement())
+  cafeId    Int
+  rating    Int
+  text      String?
+  createdAt DateTime   @default(now())
+  cafe      Cafe       @relation(fields: [cafeId], references: [id])
+}
