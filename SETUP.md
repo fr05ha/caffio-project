@@ -37,6 +37,133 @@ Make sure you have the following installed:
 - **PostgreSQL** (v14 or higher) - [Download here](https://www.postgresql.org/download/)
 - **Git** - [Download here](https://git-scm.com/)
 
+## PostgreSQL Setup
+
+If you don't have PostgreSQL installed, follow these instructions for your operating system:
+
+### Windows Installation
+
+1. **Download PostgreSQL:**
+   - Go to [PostgreSQL Downloads](https://www.postgresql.org/download/windows/)
+   - Download the installer for Windows
+   - Choose the latest version (14 or higher)
+
+2. **Run the Installer:**
+   - Run the downloaded `.exe` file
+   - Follow the installation wizard
+   - **Important:** Remember the password you set for the `postgres` user
+   - Default port is `5432` (keep this)
+   - Choose the default locale or select your preference
+
+3. **Verify Installation:**
+   - Open **Command Prompt** or **PowerShell**
+   - Navigate to PostgreSQL bin directory (usually `C:\Program Files\PostgreSQL\14\bin`)
+   - Run: `psql --version`
+   - Or use pgAdmin (included with installation)
+
+4. **Start PostgreSQL Service:**
+   - Press `Win + R`, type `services.msc`, press Enter
+   - Find "postgresql-x64-14" (or similar)
+   - Right-click and select "Start" (if not already running)
+
+### Initial PostgreSQL Configuration
+
+After installation, you need to set up a user and database:
+
+**Windows:**
+
+1. **Open Command Prompt** and navigate to PostgreSQL bin directory:
+   ```cmd
+   cd "C:\Program Files\PostgreSQL\14\bin"
+   ```
+
+2. **Access PostgreSQL:**
+   ```cmd
+   psql -U postgres
+   ```
+   Enter the password you set during installation
+
+3. **Create the database:**
+   ```sql
+   CREATE DATABASE caffio;
+   ```
+
+4. **Exit psql:**
+   ```sql
+   \q
+   ```
+
+### Alternative: Create Database from Command Line
+
+**Windows:**
+```cmd
+# From Command Prompt (in PostgreSQL bin directory)
+cd "C:\Program Files\PostgreSQL\14\bin"
+createdb -U postgres caffio
+```
+
+### Verify PostgreSQL is Working
+
+Test your PostgreSQL connection:
+
+**Windows Command Prompt:**
+```cmd
+# Navigate to PostgreSQL bin directory
+cd "C:\Program Files\PostgreSQL\14\bin"
+
+# Connect to PostgreSQL
+psql -U postgres
+
+# Enter your password when prompted
+
+# List databases
+\l
+
+# Connect to caffio database
+\c caffio
+
+# Exit
+\q
+```
+
+### Common Issues
+
+**Problem: "psql: command not found"**
+- **Windows:** Add PostgreSQL bin directory to system PATH:
+  1. Press `Win + X` and select "System"
+  2. Click "Advanced system settings"
+  3. Click "Environment Variables"
+  4. Under "System variables", find "Path" and click "Edit"
+  5. Click "New" and add: `C:\Program Files\PostgreSQL\14\bin`
+  6. Click "OK" on all dialogs
+  7. Restart Command Prompt/PowerShell
+- Or use the full path: `"C:\Program Files\PostgreSQL\14\bin\psql.exe" -U postgres`
+
+**Problem: "connection refused" or "cannot connect"**
+- **Windows:** Check if PostgreSQL service is running:
+  1. Press `Win + R`, type `services.msc`, press Enter
+  2. Find "postgresql-x64-14" (or similar)
+  3. Check if status is "Running"
+  4. If not running, right-click and select "Start"
+- Make sure PostgreSQL is listening on port 5432
+
+**Problem: "authentication failed"**
+- **Windows:** Use the password you set during PostgreSQL installation
+- Make sure you're using the correct username: `-U postgres`
+- Try connecting with: `psql -U postgres -d postgres`
+- If you forgot your password, you may need to reset it
+
+**Problem: "database does not exist"**
+- Create the database first:
+  ```cmd
+  cd "C:\Program Files\PostgreSQL\14\bin"
+  createdb -U postgres caffio
+  ```
+- Or in psql:
+  ```sql
+  CREATE DATABASE caffio;
+  ```
+
 ## Step 1: Clone the Repository
 
 ```bash
@@ -46,22 +173,22 @@ cd caffio-project
 
 ## Step 2: Set Up PostgreSQL Database
 
-1. **Start PostgreSQL** (if not already running):
-   ```bash
-   # On macOS with Homebrew:
-   brew services start postgresql
-   
-   # On Linux:
-   sudo systemctl start postgresql
-   
-   # On Windows:
-   # Start PostgreSQL service from Services
-   ```
+1. **Start PostgreSQL Service** (if not already running):
+   - Press `Win + R`, type `services.msc`, press Enter
+   - Find "postgresql-x64-14" (or similar)
+   - Right-click and select "Start" (if status is "Stopped")
 
 2. **Create the database**:
-   ```bash
+   
+   **Option A: Using psql (SQL prompt)**
+   ```cmd
+   # Navigate to PostgreSQL bin directory
+   cd "C:\Program Files\PostgreSQL\14\bin"
+   
    # Connect to PostgreSQL
-   psql postgres
+   psql -U postgres
+   
+   # Enter your password when prompted
    
    # Create database
    CREATE DATABASE caffio;
@@ -69,10 +196,14 @@ cd caffio-project
    # Exit psql
    \q
    ```
-
-   Or create it from command line:
-   ```bash
-   createdb caffio
+   
+   **Option B: Using createdb (Command line)**
+   ```cmd
+   # Navigate to PostgreSQL bin directory
+   cd "C:\Program Files\PostgreSQL\14\bin"
+   
+   # Create database
+   createdb -U postgres caffio
    ```
 
 ## Step 3: Set Up Backend
@@ -90,11 +221,20 @@ cd caffio-project
 3. **Create environment file**:
    
    Create a `.env` file in the `apps/backend` directory:
-   ```bash
-   touch .env
+   
+   **Windows Command Prompt:**
+   ```cmd
+   cd apps\backend
+   type nul > .env
    ```
    
-   Or create it manually in your editor.
+   **Windows PowerShell:**
+   ```powershell
+   cd apps\backend
+   New-Item .env -ItemType File
+   ```
+   
+   Or create it manually in your editor (Notepad, VS Code, etc.).
 
 4. **Configure database connection in `.env`**:
    
@@ -105,21 +245,18 @@ cd caffio-project
    
    **Replace `YOUR_USERNAME` and `YOUR_PASSWORD` with your PostgreSQL credentials.**
    
-   **Examples:**
+   **Example for Windows (default postgres user):**
    
-   - If your PostgreSQL username is `postgres` and password is `postgres`:
+   If your PostgreSQL username is `postgres` and your password is `your_password`:
      ```env
-     DATABASE_URL="postgresql://postgres:postgres@localhost:5432/caffio?schema=public"
+     DATABASE_URL="postgresql://postgres:your_password@localhost:5432/caffio?schema=public"
      ```
    
-   - If your PostgreSQL username is your system username (e.g., `john`) and no password:
-     ```env
-     DATABASE_URL="postgresql://john@localhost:5432/caffio?schema=public"
-     ```
+   **Important:** Replace `your_password` with the password you set during PostgreSQL installation.
    
-   - If you're using a different PostgreSQL user:
+   Example:
      ```env
-     DATABASE_URL="postgresql://mikkey_frolkin@localhost:5432/caffio?schema=public"
+     DATABASE_URL="postgresql://postgres:mypassword123@localhost:5432/caffio?schema=public"
      ```
    
    **Note:** Make sure `.env` is in `apps/backend/.env` (not in the root directory)
@@ -244,14 +381,17 @@ npm install
 ### Database Issues
 
 **Problem: Database connection errors**
-```bash
+```cmd
+# Navigate to PostgreSQL bin directory
+cd "C:\Program Files\PostgreSQL\14\bin"
+
 # Test PostgreSQL connection
-psql -U YOUR_USERNAME -d caffio
+psql -U postgres -d caffio
 
 # If connection fails, check:
-# 1. PostgreSQL is running
-# 2. User exists and has permissions
-# 3. Database exists
+# 1. PostgreSQL is running (check Services app)
+# 2. User exists and has permissions (default: postgres)
+# 3. Database exists (CREATE DATABASE caffio;)
 ```
 
 ## Project Structure
