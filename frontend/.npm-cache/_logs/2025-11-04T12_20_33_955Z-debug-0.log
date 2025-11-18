@@ -10,3 +10,9 @@
 9 verbose logfile logs-max:10 dir:/Users/mikkey_frolkin/caffio-project/frontend/.npm-cache/_logs/2025-11-04T12_20_33_955Z-
 10 verbose logfile /Users/mikkey_frolkin/caffio-project/frontend/.npm-cache/_logs/2025-11-04T12_20_33_955Z-debug-0.log
 11 silly logfile done cleaning log files
+12 verbose cwd /Users/mikkey_frolkin/caffio-project/frontend
+13 verbose os Darwin 24.2.0
+14 verbose node v22.16.0
+15 verbose npm  v10.9.2
+16 verbose exit 143
+17 verbose code 143

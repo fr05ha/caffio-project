@@ -5,6 +5,7 @@ import { CafesModule } from './cafes/cafes.module';
 import { MenusModule } from './menus/menus.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { AuthModule } from './auth/auth.module';
+import { CustomersModule } from './customers/customers.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
     MenusModule,
     ReviewsModule,
     AuthModule,
+    CustomersModule,
   ],
   providers: [PrismaService],
 })

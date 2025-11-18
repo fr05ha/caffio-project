@@ -1,5 +1,7 @@
 // API service for Caff.io mobile app
-const API_BASE_URL = 'http://localhost:3000';
+// Use your Mac's local IP for Expo Go on physical device
+// For iOS Simulator, use 'http://localhost:3000'
+const API_BASE_URL = 'http://10.1.1.146:3000';
 
 export interface Cafe {
   id: number;
@@ -11,6 +13,11 @@ export interface Cafe {
   ratingCount: number;
   isCertified: boolean;
   createdAt: string;
+  logoUrl?: string;
+  imageUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
 }
 
 export interface Menu {
@@ -28,6 +35,7 @@ export interface MenuItem {
   description?: string;
   price: number;
   currency: string;
+  imageUrl?: string;
 }
 
 export interface Review {
@@ -36,6 +44,14 @@ export interface Review {
   rating: number;
   text?: string;
   createdAt: string;
+}
+
+export interface Customer {
+  id: number;
+  name?: string | null;
+  email: string;
+  favoriteCafes?: Cafe[];
+  favoriteMenuItems?: MenuItem[];
 }
 
 class ApiService {
@@ -93,10 +109,10 @@ class ApiService {
     });
   }
 
-  async addMenuItem(menuId: number, name: string, description?: string, price: number, currency?: string): Promise<MenuItem> {
+  async addMenuItem(data: { menuId: number; name: string; price: number; description?: string; currency?: string }): Promise<MenuItem> {
     return this.request<MenuItem>('/menus/items', {
       method: 'POST',
-      body: JSON.stringify({ menuId, name, description, price, currency }),
+      body: JSON.stringify(data),
     });
   }
 
@@ -109,6 +125,51 @@ class ApiService {
     return this.request<Review>('/reviews', {
       method: 'POST',
       body: JSON.stringify({ cafeId, rating, text }),
+    });
+  }
+
+  // Customer Auth
+  async customerSignup(data: { name?: string; email: string; password: string }): Promise<Customer> {
+    return this.request<Customer>('/customers/signup', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async customerLogin(email: string, password: string): Promise<Customer> {
+    return this.request<Customer>('/customers/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  }
+
+  async getCustomerProfile(id: number): Promise<Customer> {
+    return this.request<Customer>(`/customers/${id}`);
+  }
+
+  async addFavoriteCafe(customerId: number, cafeId: number): Promise<Customer> {
+    return this.request<Customer>(`/customers/${customerId}/favorites/cafes`, {
+      method: 'POST',
+      body: JSON.stringify({ cafeId }),
+    });
+  }
+
+  async removeFavoriteCafe(customerId: number, cafeId: number): Promise<Customer> {
+    return this.request<Customer>(`/customers/${customerId}/favorites/cafes/${cafeId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async addFavoriteMenuItem(customerId: number, menuItemId: number): Promise<Customer> {
+    return this.request<Customer>(`/customers/${customerId}/favorites/menu-items`, {
+      method: 'POST',
+      body: JSON.stringify({ menuItemId }),
+    });
+  }
+
+  async removeFavoriteMenuItem(customerId: number, menuItemId: number): Promise<Customer> {
+    return this.request<Customer>(`/customers/${customerId}/favorites/menu-items/${menuItemId}`, {
+      method: 'DELETE',
     });
   }
 }

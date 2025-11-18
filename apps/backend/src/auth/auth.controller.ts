@@ -1,5 +1,5 @@
 import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
-import { ApiTags, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 
 @ApiTags('auth')
@@ -11,15 +11,17 @@ export class AuthController {
   @ApiBody({
     schema: {
       properties: {
-        email: { type: 'string' },
-        password: { type: 'string' },
+        email: { type: 'string', example: 'admin1@caffio.com' },
+        password: { type: 'string', example: 'Admin123!' },
       },
       required: ['email', 'password'],
     },
   })
-  async login(@Body() data: { email: string; password: string }) {
+  @ApiResponse({ status: 200, description: 'Login successful' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  async login(@Body() body: { email: string; password: string }) {
     try {
-      return await this.authService.login(data.email, data.password);
+      return await this.authService.login(body.email, body.password);
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;
@@ -28,6 +30,4 @@ export class AuthController {
     }
   }
 }
-
-
 

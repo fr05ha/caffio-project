@@ -1,66 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model Cafe {
-  id           Int        @id @default(autoincrement())
-  name         String
-  address      String?
-  lat          Float
-  lon          Float
-  ratingAvg    Float      @default(0)
-  ratingCount  Int        @default(0)
-  isCertified  Boolean    @default(false)
-  createdAt    DateTime   @default(now())
-  // Customization fields
-  primaryColor   String?
-  secondaryColor String?
+  id             Int                    @id @default(autoincrement())
+  name           String
+  address        String?
+  lat            Float
+  lon            Float
+  ratingAvg      Float                  @default(0)
+  ratingCount    Int                    @default(0)
+  isCertified    Boolean                @default(false)
+  createdAt      DateTime               @default(now())
   accentColor    String?
   logoUrl        String?
+  primaryColor   String?
+  secondaryColor String?
   theme          String?
-  menus        Menu[]
-  reviews      Review[]
-  user         User?
+  favoritedBy    CustomerFavoriteCafe[]
+  menus          Menu[]
+  reviews        Review[]
+  user           User?
 }
 
 model User {
-  id           Int        @id @default(autoincrement())
-  email        String     @unique
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
   passwordHash String
-  cafeId       Int        @unique
-  cafe         Cafe       @relation(fields: [cafeId], references: [id])
-  createdAt    DateTime   @default(now())
+  cafeId       Int      @unique
+  createdAt    DateTime @default(now())
+  cafe         Cafe     @relation(fields: [cafeId], references: [id])
 }
 
 model Menu {
-  id        Int        @id @default(autoincrement())
-  cafeId    Int
-  name      String     @default("Main")
-  isActive  Boolean    @default(true)
-  cafe      Cafe       @relation(fields: [cafeId], references: [id])
-  items     MenuItem[]
+  id       Int        @id @default(autoincrement())
+  cafeId   Int
+  name     String     @default("Main")
+  isActive Boolean    @default(true)
+  cafe     Cafe       @relation(fields: [cafeId], references: [id])
+  items    MenuItem[]
 }
 
 model MenuItem {
-  id          Int        @id @default(autoincrement())
+  id          Int                        @id @default(autoincrement())
   menuId      Int
   name        String
   description String?
   price       Float
-  currency    String     @default("AUD")
-  menu        Menu       @relation(fields: [menuId], references: [id])
+  currency    String                     @default("AUD")
+  favoritedBy CustomerFavoriteMenuItem[]
+  menu        Menu                       @relation(fields: [menuId], references: [id])
 }
 
 model Review {
-  id        Int        @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   cafeId    Int
   rating    Int
   text      String?
-  createdAt DateTime   @default(now())
-  cafe      Cafe       @relation(fields: [cafeId], references: [id])
+  createdAt DateTime @default(now())
+  cafe      Cafe     @relation(fields: [cafeId], references: [id])
+}
+
+model Customer {
+  id                Int                        @id @default(autoincrement())
+  name              String?
+  email             String                     @unique
+  passwordHash      String
+  createdAt         DateTime                   @default(now())
+  favoriteCafes     CustomerFavoriteCafe[]
+  favoriteMenuItems CustomerFavoriteMenuItem[]
+}
+
+model CustomerFavoriteCafe {
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  cafeId     Int
+  createdAt  DateTime @default(now())
+  cafe       Cafe     @relation(fields: [cafeId], references: [id])
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  @@unique([customerId, cafeId])
+}
+
+model CustomerFavoriteMenuItem {
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  menuItemId Int
+  createdAt  DateTime @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id])
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@unique([customerId, menuItemId])
 }
