@@ -61,27 +61,39 @@
 
 ### 3. Первый деплой и сидирование данных
 
-После первого успешного деплоя:
+⚠️ **Важно**: На бесплатном тарифе Render **Shell недоступен**, поэтому сидирование нужно делать локально.
 
-1. Открой вкладку **Shell** в Render (или используй **Logs** для просмотра)
-2. Если нужно засидировать данные, создай временный скрипт или используй Render Shell:
+#### Способ 1: Сидирование через локальное подключение (рекомендуется)
+
+1. После успешного деплоя открой PostgreSQL сервис в Render → вкладка **Info**
+2. Скопируй **External Database URL** (начинается с `postgresql://...`)
+3. Локально создай временный `.env` файл в `apps/backend/`:
    ```bash
-   # В Render Shell (если доступен) или через один из способов ниже
    cd apps/backend
+   echo "DATABASE_URL=<вставь External Database URL из Render>" > .env.render
+   ```
+4. Запусти сидирование локально, используя Render базу:
+   
+   **Вариант A: Один скрипт (рекомендуется)**
+   ```bash
+   cd apps/backend
+   DATABASE_URL="<External Database URL>" npx ts-node scripts/seed-all.ts
+   ```
+   
+   **Вариант B: Отдельные скрипты**
+   ```bash
+   cd apps/backend
+   export DATABASE_URL="<External Database URL>"
    npx ts-node scripts/seed-admin-accounts.ts
    npx ts-node scripts/add-oh-matcha.ts
    npx ts-node scripts/set-cafe-themes.ts
    ```
 
-   ⚠️ **Проблема**: На бесплатном тарифе Shell может быть недоступен.
+5. После сидирования удали временный `.env.render` файл (если создавал)
 
-   **Альтернатива**: Добавь сидирование в `prisma/seed.ts` и запусти через:
-   ```bash
-   npm run seed
-   ```
-   Но это тоже требует доступа к Shell.
+#### Способ 2: Обновить seed.ts для автоматического сидирования
 
-   **Лучшее решение**: Засидируй данные локально после первого деплоя, подключившись к Render PostgreSQL через `External Database URL`.
+Можно расширить `prisma/seed.ts`, чтобы он включал все необходимые данные (админы, кафе, темы). Тогда после деплоя можно будет запустить `npm run seed` локально с `DATABASE_URL` от Render (как в способе 1).
 
 ### 4. Проверка работы
 
