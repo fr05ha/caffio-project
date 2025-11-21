@@ -4,13 +4,15 @@
   "description": "Caffio (Coffee Hub) backend service built with NestJS and Prisma",
   "private": true,
   "license": "MIT",
-  "main": "dist/main.js",
+  "main": "dist/src/main.js",
   "scripts": {
     "dev": "nest start --watch",
-    "build": "nest build",
-    "start": "node dist/main.js",
+    "build": "nest build && npx prisma generate",
+    "start": "node dist/src/main.js",
+    "start:prod": "bash scripts/start.sh",
     "start:dev": "nest start --watch",
     "migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
     "seed": "prisma db seed",
     "studio": "prisma studio"
   },
