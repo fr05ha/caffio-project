@@ -56,6 +56,6 @@ Additional tools and techniques to be integrated include:
 - **Monitoring and logging tools** for production observability
 - **Performance profiling tools** for optimization
 
-This integrated toolset, combined with version control via GitHub, a structured testing strategy, and modern development practices, provides a solid technical foundation for building the Caff.io MVP and scaling to production.
+This integrated toolset, combined with version control via GitHub, a structured testing strategy, and modern development practices, provides a solid technical foundation for building the Caffio MVP and scaling to production.
 
 

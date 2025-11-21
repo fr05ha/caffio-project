@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,13 @@ import {
   ActivityIndicator,
   Dimensions,
   Platform,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { apiService, Cafe, Menu, MenuItem } from '../services/api';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import { baseTheme } from '../theme';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -40,6 +44,9 @@ export default function CoffeeShopDetail({
   const [cafe, setCafe] = useState<CafeDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'menu' | 'reviews' | 'info'>('menu');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [cart, setCart] = useState<Record<number, { item: MenuItem; quantity: number }>>({});
 
   useEffect(() => {
     loadCafeDetails();
@@ -51,6 +58,8 @@ export default function CoffeeShopDetail({
       setError(null);
       const cafeData = await apiService.getCafeById(cafeId);
       setCafe(cafeData as CafeDetail);
+      setSelectedCategory('All');
+      setCart({});
     } catch (err) {
       console.error('Error loading cafe details:', err);
       setError('Failed to load cafe details');
@@ -59,51 +68,127 @@ export default function CoffeeShopDetail({
     }
   };
 
+  const menuCategories = useMemo(() => {
+    if (!cafe) return ['All'];
+    const names = cafe.menus.map((menu) => menu.name ?? 'Menu');
+    return ['All', ...names];
+  }, [cafe]);
+
+  const visibleMenuItems = useMemo(() => {
+    if (!cafe) return [];
+    if (selectedCategory === 'All') {
+      return cafe.menus.flatMap((menu) => menu.items);
+    }
+    return cafe.menus
+      .filter((menu) => menu.name === selectedCategory)
+      .flatMap((menu) => menu.items);
+  }, [cafe, selectedCategory]);
+
+  const cartEntries = useMemo(() => Object.values(cart), [cart]);
+  const cartCount = useMemo(() => cartEntries.reduce((sum, entry) => sum + entry.quantity, 0), [cartEntries]);
+  const cartTotal = useMemo(
+    () => cartEntries.reduce((sum, entry) => sum + entry.item.price * entry.quantity, 0),
+    [cartEntries],
+  );
+
   const formatPrice = (price: number, currency: string = 'AUD') => {
     return `$${price.toFixed(2)} ${currency}`;
   };
 
+  const handleAddToCart = (item: MenuItem) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setCart((prev) => {
+      const existing = prev[item.id];
+      return {
+        ...prev,
+        [item.id]: {
+          item,
+          quantity: existing ? existing.quantity + 1 : 1,
+        },
+      };
+    });
+  };
+
+  const handleRemoveFromCart = (itemId: number) => {
+    setCart((prev) => {
+      const existing = prev[itemId];
+      if (!existing) return prev;
+      if (existing.quantity === 1) {
+        const { [itemId]: _, ...rest } = prev;
+        return rest;
+      }
+      return {
+        ...prev,
+        [itemId]: { ...existing, quantity: existing.quantity - 1 },
+      };
+    });
+  };
+
+  const handlePlaceOrder = () => {
+    if (!cartCount) return;
+    Alert.alert('Order placed', 'Your order is being prepared. You will receive a pickup notification shortly.');
+    setCart({});
+  };
+
   const renderMenuItem = (item: MenuItem) => {
     const isFavorite = favoriteMenuItemIds.includes(item.id);
+    const cartEntry = cart[item.id];
+
     return (
-    <TouchableOpacity key={item.id} style={styles.menuItem}>
-      <View style={styles.menuItemContent}>
-        {/* Menu Item Image - Use item imageUrl if available, otherwise placeholder */}
-        <View style={styles.menuItemImageContainer}>
-          <Image
-            source={{ 
-              uri: item.imageUrl || 'https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=400' 
-            }}
-            style={styles.menuItemImage}
-            resizeMode="cover"
-          />
-        </View>
-        
-        <View style={styles.menuItemInfo}>
-          <View style={styles.menuItemHeader}>
-            <Text style={styles.menuItemName}>{item.name}</Text>
-            {onToggleMenuItemFavorite && (
-              <TouchableOpacity
-                onPress={() => onToggleMenuItemFavorite(item.id)}
-                style={styles.menuItemFavoriteButton}
-              >
-                <Ionicons
-                  name={isFavorite ? 'heart' : 'heart-outline'}
-                  size={20}
-                  color={isFavorite ? '#D32F2F' : '#8D6E63'}
-                />
-              </TouchableOpacity>
-            )}
+      <View key={item.id} style={styles.menuItem}>
+        <View style={styles.menuItemContent}>
+          <View style={styles.menuItemImageContainer}>
+            <Image
+              source={{
+                uri: item.imageUrl || 'https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=400',
+              }}
+              style={styles.menuItemImage}
+              resizeMode="cover"
+            />
           </View>
-          {item.description && (
-            <Text style={styles.menuItemDescription} numberOfLines={2}>
-              {item.description}
-            </Text>
-          )}
-          <Text style={styles.menuItemPrice}>{formatPrice(item.price, item.currency)}</Text>
+
+          <View style={styles.menuItemInfo}>
+            <View style={styles.menuItemHeader}>
+              <Text style={styles.menuItemName}>{item.name}</Text>
+              {onToggleMenuItemFavorite && (
+                <TouchableOpacity
+                  onPress={() => onToggleMenuItemFavorite(item.id)}
+                  style={styles.menuItemFavoriteButton}
+                >
+                  <Ionicons
+                    name={isFavorite ? 'heart' : 'heart-outline'}
+                    size={20}
+                    color={isFavorite ? '#D32F2F' : '#8D6E63'}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+            {item.description && (
+              <Text style={styles.menuItemDescription} numberOfLines={2}>
+                {item.description}
+              </Text>
+            )}
+            <View style={styles.menuItemFooter}>
+              <Text style={styles.menuItemPrice}>{formatPrice(item.price, item.currency)}</Text>
+              {cartEntry ? (
+                <View style={styles.quantityStepper}>
+                  <TouchableOpacity onPress={() => handleRemoveFromCart(item.id)}>
+                    <Ionicons name="remove" size={18} color="#5D4037" />
+                  </TouchableOpacity>
+                  <Text style={styles.quantityText}>{cartEntry.quantity}</Text>
+                  <TouchableOpacity onPress={() => handleAddToCart(item)}>
+                    <Ionicons name="add" size={18} color="#5D4037" />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity style={styles.addButton} onPress={() => handleAddToCart(item)}>
+                  <Text style={styles.addButtonText}>Add</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
         </View>
       </View>
-    </TouchableOpacity>
     );
   };
 
@@ -262,6 +347,17 @@ export default function CoffeeShopDetail({
           )}
         </View>
       </ScrollView>
+      {cartCount > 0 && (
+        <View style={styles.orderBar}>
+          <View>
+            <Text style={styles.orderBarTitle}>{cartCount} items</Text>
+            <Text style={styles.orderBarSubtitle}>Total {formatPrice(cartTotal)}</Text>
+          </View>
+          <TouchableOpacity style={styles.orderButton} onPress={handlePlaceOrder}>
+            <Text style={styles.orderButtonText}>Review order</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -497,10 +593,39 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     lineHeight: 20,
   },
+  menuItemFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
   menuItemPrice: {
     fontSize: 16,
     fontWeight: '700',
     color: '#795548',
+  },
+  quantityStepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF8F0',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  quantityText: {
+    marginHorizontal: 10,
+    fontWeight: '700',
+    color: '#5D4037',
+  },
+  addButton: {
+    backgroundColor: '#5D4037',
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 6,
+  },
+  addButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   emptyMenu: {
     alignItems: 'center',
@@ -510,6 +635,41 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     color: '#BDBDBD',
+  },
+  orderBar: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    bottom: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  orderBarTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#3E2723',
+  },
+  orderBarSubtitle: {
+    color: '#8D6E63',
+  },
+  orderButton: {
+    backgroundColor: '#5D4037',
+    borderRadius: 18,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  orderButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
 });
 

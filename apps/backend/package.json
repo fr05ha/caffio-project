@@ -1,7 +1,7 @@
 {
   "name": "caffio-backend",
   "version": "1.0.0",
-  "description": "Caff.io (Coffee Hub) backend service built with NestJS and Prisma",
+  "description": "Caffio (Coffee Hub) backend service built with NestJS and Prisma",
   "private": true,
   "license": "MIT",
   "main": "dist/main.js",

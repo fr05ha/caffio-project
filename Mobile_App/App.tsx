@@ -1,10 +1,25 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Dimensions, FlatList } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  Platform,
+  Dimensions,
+  FlatList,
+  ScrollView,
+  TextInput,
+  Image,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { apiService, Cafe, Customer } from './services/api';
 import { LocationService, LocationData } from './services/location';
 import CoffeeShopDetail from './components/CoffeeShopDetail';
 import AuthScreen from './components/auth/AuthScreen';
+import { baseTheme } from './theme';
 
 interface CoffeeShop {
   id: number;
@@ -16,9 +31,10 @@ interface CoffeeShop {
   priceRange?: string;
   isOpen?: boolean;
   isCertified?: boolean;
+  image?: string;
 }
 
-const CAFFIO_APP_NAME = 'Caff.io';
+const CAFFIO_APP_NAME = 'Caffio';
 
 const DUMMY_SHOPS: CoffeeShop[] = [
   {
@@ -30,6 +46,7 @@ const DUMMY_SHOPS: CoffeeShop[] = [
     description: 'Artisanal coffee with locally sourced beans',
     priceRange: '$$',
     isOpen: true,
+    image: 'https://images.unsplash.com/photo-1504753793650-d4a2b783c15f?auto=format&w=800',
   },
   {
     id: 2,
@@ -40,6 +57,7 @@ const DUMMY_SHOPS: CoffeeShop[] = [
     description: 'Cozy atmosphere with specialty drinks',
     priceRange: '$',
     isOpen: true,
+    image: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&w=800',
   },
 ];
 
@@ -54,6 +72,8 @@ export default function App() {
   const [favoriteCafeIds, setFavoriteCafeIds] = useState<number[]>([]);
   const [favoriteMenuItemIds, setFavoriteMenuItemIds] = useState<number[]>([]);
   const [authLoading, setAuthLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'certified' | 'topRated' | 'nearby'>('all');
   const flatListRef = useRef<FlatList<CoffeeShop>>(null);
 
   useEffect(() => {
@@ -93,6 +113,9 @@ export default function App() {
         isCertified: cafe.isCertified,
         description: `Rated by ${cafe.ratingCount} customers`,
         priceRange: '$$',
+        image:
+          cafe.imageUrl ||
+          'https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&w=800&q=80',
       }));
 
       setCoffeeShops(transformedShops);
@@ -145,6 +168,7 @@ export default function App() {
 
   const toggleCafeFavorite = async (cafeId: number) => {
     if (!currentCustomer) return;
+    Haptics.selectionAsync();
     const isFavorite = favoriteCafeIds.includes(cafeId);
     const profile = isFavorite
       ? await apiService.removeFavoriteCafe(currentCustomer.id, cafeId)
@@ -169,6 +193,19 @@ export default function App() {
     setSelectedCafeId(null);
   };
 
+  const filteredCoffeeShops = useMemo(() => {
+    let filtered = coffeeShops;
+    if (selectedFilter === 'certified') {
+      filtered = filtered.filter((shop) => shop.isCertified);
+    } else if (selectedFilter === 'topRated') {
+      filtered = filtered.filter((shop) => shop.rating >= 4.6);
+    }
+    if (searchText.trim()) {
+      filtered = filtered.filter((shop) => shop.name.toLowerCase().includes(searchText.trim().toLowerCase()));
+    }
+    return filtered;
+  }, [coffeeShops, searchText, selectedFilter]);
+
   const renderCoffeeShopCard = ({ item }: { item: CoffeeShop }) => {
     const isFavorite = favoriteCafeIds.includes(item.id);
     return (
@@ -177,11 +214,22 @@ export default function App() {
         activeOpacity={0.85}
         onPress={() => handleCafePress(item.id)}
       >
-        <View style={styles.card}>
+        <LinearGradient
+          colors={[baseTheme.palette.card, baseTheme.palette.cream]}
+          style={styles.card}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <Image
+            source={{
+              uri: item.image || 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&w=800',
+            }}
+            style={styles.cardImage}
+          />
           <View style={styles.cardHeader}>
             <View style={styles.statusContainer}>
               <View style={[styles.statusDot, { backgroundColor: item.isOpen ? '#4CAF50' : '#F44336' }]} />
-              <Text style={styles.statusText}>{item.isOpen ? 'Open' : 'Closed'}</Text>
+              <Text style={styles.statusText}>{item.isOpen ? 'Open now' : 'Closed'}</Text>
               {item.isCertified && (
                 <View style={styles.certifiedBadge}>
                   <Ionicons name="checkmark-circle" size={12} color="#4CAF50" />
@@ -189,38 +237,44 @@ export default function App() {
                 </View>
               )}
             </View>
-            <View style={styles.cardHeaderRight}>
-              <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={16} color="#FFC107" />
-                <Text style={styles.ratingText}>{item.rating.toFixed(1)}</Text>
-              </View>
+            <TouchableOpacity onPress={() => toggleCafeFavorite(item.id)}>
               <Ionicons
                 name={isFavorite ? 'heart' : 'heart-outline'}
-                size={20}
-                color={isFavorite ? '#D32F2F' : '#8D6E63'}
-                style={styles.favoriteIndicator}
+                size={22}
+                color={isFavorite ? baseTheme.palette.danger : baseTheme.palette.textSecondary}
               />
-            </View>
+            </TouchableOpacity>
           </View>
 
           <Text style={styles.cardTitle}>{item.name}</Text>
-          <View style={styles.cardDistance}>
-            <Ionicons name="location-outline" size={14} color="#8D6E63" />
-            <Text style={styles.distanceText}>
-              {item.distance} • {item.address}
-            </Text>
-          </View>
-
           <Text style={styles.cardDescription}>{item.description}</Text>
 
-          <View style={styles.cardFooter}>
-            <Text style={styles.priceRange}>{item.priceRange}</Text>
-            <View style={styles.viewButton}>
-              <Text style={styles.viewButtonText}>View Details</Text>
-              <Ionicons name="arrow-forward" size={16} color="#5D4037" />
+          <View style={styles.metaRow}>
+            <View style={styles.metaChip}>
+              <Ionicons name="location-outline" size={14} color={baseTheme.palette.textSecondary} />
+              <Text style={styles.metaText}>{item.distance}</Text>
+            </View>
+            <View style={styles.metaChip}>
+              <Ionicons name="star" size={14} color="#FFC107" />
+              <Text style={styles.metaText}>{item.rating.toFixed(1)}</Text>
+            </View>
+            <View style={styles.metaChip}>
+              <Ionicons name="cash-outline" size={14} color={baseTheme.palette.textSecondary} />
+              <Text style={styles.metaText}>{item.priceRange}</Text>
             </View>
           </View>
-        </View>
+
+          <View style={styles.cardFooter}>
+            <View>
+              <Text style={styles.cardFooterLabel}>Signature vibe</Text>
+              <Text style={styles.cardFooterText}>{item.address}</Text>
+            </View>
+            <View style={styles.viewButton}>
+              <Text style={styles.viewButtonText}>See menu</Text>
+              <Ionicons name="arrow-forward" size={16} color={baseTheme.palette.brandBrown} />
+            </View>
+          </View>
+        </LinearGradient>
       </TouchableOpacity>
     );
   };
@@ -244,51 +298,141 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.topBar}>
-        <View>
-          <Text style={styles.greeting}>Hi, {currentCustomer.name || currentCustomer.email}</Text>
-          <Text style={styles.favoritesSummary}>
-            {favoriteCafeIds.length} favorite cafes • {favoriteMenuItemIds.length} favorite drinks
-          </Text>
-        </View>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Ionicons name="log-out-outline" size={20} color="#5D4037" />
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Text style={styles.title}>{CAFFIO_APP_NAME}</Text>
-      <Text style={styles.subtitle}>Discover the best local coffee shops nearby</Text>
-
-      {loading ? (
-        <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color="#795548" />
-          <Text style={styles.loadingText}>Finding coffee shops...</Text>
-        </View>
-      ) : error ? (
-        <View style={styles.errorBox}>
-          <Ionicons name="warning-outline" size={48} color="#F44336" />
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadCoffeeShops}>
-            <Text style={styles.retryButtonText}>Try Again</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.topBar}>
+          <View>
+            <Text style={styles.greeting}>Morning, {currentCustomer.name || currentCustomer.email}</Text>
+            <Text style={styles.favoritesSummary}>
+              {favoriteCafeIds.length} favorites • {favoriteMenuItemIds.length} drinks saved
+            </Text>
+          </View>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Ionicons name="log-out-outline" size={20} color={baseTheme.palette.brandBrown} />
+            <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
         </View>
-      ) : (
-        <View style={styles.carouselContainer}>
-          <FlatList
-            ref={flatListRef}
-            data={coffeeShops}
-            renderItem={renderCoffeeShopCard}
-            keyExtractor={(item) => item.id.toString()}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            snapToInterval={screenWidth * 0.9}
-            decelerationRate="fast"
-            contentContainerStyle={styles.carouselContent}
-            style={styles.flatList}
-          />
+
+        <View style={styles.heroCard}>
+          <View style={styles.heroHeader}>
+            <View style={styles.heroLogoWrapper}>
+              <Image source={require('./assets/caffio-logo.png')} style={styles.heroLogo} />
+            </View>
+            <View>
+              <Text style={styles.heroEyebrow}>Caffio concierge</Text>
+              <Text style={styles.heroHeadline}>Curating cafes for you</Text>
+            </View>
+          </View>
+          <View style={styles.searchBar}>
+            <Ionicons name="search-outline" size={18} color={baseTheme.palette.textSecondary} />
+            <TextInput
+              placeholder="Find a cafe, drink, or vibe"
+              placeholderTextColor="#A1887F"
+              style={styles.searchInput}
+              value={searchText}
+              onChangeText={setSearchText}
+            />
+            <TouchableOpacity style={styles.filterIcon}>
+              <Ionicons name="options-outline" size={18} color={baseTheme.palette.card} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.filterRow}>
+            {['all', 'certified', 'topRated', 'nearby'].map((filter) => (
+              <TouchableOpacity
+                key={filter}
+                style={[
+                  styles.filterChip,
+                  selectedFilter === filter && { backgroundColor: baseTheme.palette.brandBrown },
+                ]}
+                onPress={() => setSelectedFilter(filter as typeof selectedFilter)}
+              >
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    selectedFilter === filter && { color: '#FFFFFF', fontWeight: '700' },
+                  ]}
+                >
+                  {filter === 'all'
+                    ? 'All'
+                    : filter === 'certified'
+                    ? 'Certified'
+                    : filter === 'topRated'
+                    ? 'Top rated'
+                    : 'Nearby'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      )}
+
+        {loading ? (
+          <View style={styles.loadingBox}>
+            <ActivityIndicator size="large" color={baseTheme.palette.brandBrown} />
+            <Text style={styles.loadingText}>Brewing recommendations...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.errorBox}>
+            <Ionicons name="warning-outline" size={48} color={baseTheme.palette.danger} />
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={loadCoffeeShops}>
+              <Text style={styles.retryButtonText}>Try Again</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Trending near you</Text>
+              <TouchableOpacity>
+                <Text style={styles.sectionLink}>View all</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.carouselContainer}>
+              <FlatList
+                ref={flatListRef}
+                data={filteredCoffeeShops}
+                renderItem={renderCoffeeShopCard}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                snapToInterval={screenWidth * 0.85}
+                decelerationRate="fast"
+                contentContainerStyle={styles.carouselContent}
+                style={styles.flatList}
+              />
+            </View>
+
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>All cafes</Text>
+            </View>
+            <View style={styles.listingGrid}>
+              {filteredCoffeeShops.map((shop) => (
+                <TouchableOpacity
+                  key={shop.id}
+                  style={styles.listingCard}
+                  activeOpacity={0.85}
+                  onPress={() => handleCafePress(shop.id)}
+                >
+                  <Image
+                    source={{
+                      uri: shop.image || 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&w=800',
+                    }}
+                    style={styles.listingImage}
+                  />
+                  <View style={styles.listingContent}>
+                    <Text style={styles.listingName}>{shop.name}</Text>
+                    <Text style={styles.listingMeta}>
+                      {shop.distance} • {shop.rating.toFixed(1)} ★
+                    </Text>
+                  </View>
+                  <View style={styles.listingButton}>
+                    <Text style={styles.listingButtonText}>Order</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -296,60 +440,122 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF8F0',
+    backgroundColor: baseTheme.palette.cream,
     paddingTop: Platform.select({ ios: 60, android: 40 }),
+  },
+  scrollContent: {
     paddingHorizontal: 16,
+    paddingBottom: 40,
   },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   greeting: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#4E342E',
+    color: baseTheme.palette.brandBrown,
   },
   favoritesSummary: {
     fontSize: 14,
-    color: '#8D6E63',
+    color: baseTheme.palette.textSecondary,
     marginTop: 2,
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EFEBE9',
+    backgroundColor: baseTheme.palette.sand,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
   logoutText: {
     marginLeft: 4,
-    color: '#5D4037',
+    color: baseTheme.palette.brandBrown,
     fontWeight: '600',
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#5D4037',
-    textAlign: 'center',
-    marginBottom: 4,
+  heroCard: {
+    backgroundColor: baseTheme.palette.card,
+    borderRadius: 28,
+    padding: 20,
+    marginBottom: 20,
+    ...baseTheme.shadows.card,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#8D6E63',
-    textAlign: 'center',
-    marginBottom: 24,
+  heroHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  heroLogoWrapper: {
+    width: 54,
+    height: 54,
+    borderRadius: 18,
+    backgroundColor: baseTheme.palette.cream,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  heroLogo: {
+    width: 36,
+    height: 36,
+  },
+  heroEyebrow: {
+    fontSize: 12,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    color: baseTheme.palette.textSecondary,
+  },
+  heroHeadline: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: baseTheme.palette.textPrimary,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: baseTheme.palette.creamLight,
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 14,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 15,
+    color: baseTheme.palette.textPrimary,
+  },
+  filterIcon: {
+    backgroundColor: baseTheme.palette.brandBrown,
+    padding: 8,
+    borderRadius: 14,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  filterChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: baseTheme.palette.cream,
+  },
+  filterChipText: {
+    fontSize: 13,
+    color: baseTheme.palette.textSecondary,
   },
   loadingBox: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    marginVertical: 80,
   },
   loadingText: {
     marginTop: 16,
-    color: '#795548',
+    color: baseTheme.palette.brandBrown,
     fontSize: 16,
   },
   carouselContainer: {
@@ -368,26 +574,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 28,
     padding: 20,
     borderWidth: 1,
-    borderColor: '#F5F5F5',
-    shadowColor: '#A1887F',
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    borderColor: baseTheme.palette.border,
+    ...baseTheme.shadows.card,
+  },
+  cardImage: {
+    width: '100%',
+    height: 140,
+    borderRadius: 22,
+    marginBottom: 16,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
-  },
-  cardHeaderRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   statusContainer: {
     flexDirection: 'row',
@@ -402,85 +605,135 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: baseTheme.palette.textSecondary,
   },
-  favoriteIndicator: {
-    marginLeft: 12,
-  },
-  ratingContainer: {
+  certifiedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF8E1',
-    borderRadius: 12,
+    backgroundColor: '#E8F5E9',
+    borderRadius: 10,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 2,
+    marginLeft: 8,
   },
-  ratingText: {
-    marginLeft: 4,
+  certifiedText: {
+    fontSize: 11,
     fontWeight: '600',
-    color: '#5D4037',
-    fontSize: 14,
+    color: '#4CAF50',
+    marginLeft: 4,
   },
   cardTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#3E2723',
+    color: baseTheme.palette.textPrimary,
     marginBottom: 6,
   },
-  cardDistance: {
+  cardDescription: {
+    fontSize: 14,
+    color: baseTheme.palette.textSecondary,
+    marginBottom: 14,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 14,
+  },
+  metaChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    backgroundColor: baseTheme.palette.cream,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
   },
-  distanceText: {
-    fontSize: 14,
-    color: '#8D6E63',
-    marginLeft: 4,
-  },
-  cardDescription: {
-    fontSize: 15,
-    color: '#6D4C41',
-    lineHeight: 20,
-    marginBottom: 16,
+  metaText: {
+    marginLeft: 6,
+    color: baseTheme.palette.textSecondary,
+    fontSize: 13,
   },
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  priceRange: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#5D4037',
+  cardFooterLabel: {
+    fontSize: 12,
+    color: baseTheme.palette.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  cardFooterText: {
+    fontSize: 14,
+    color: baseTheme.palette.textPrimary,
+    marginTop: 2,
   },
   viewButton: {
+    backgroundColor: baseTheme.palette.cream,
+    borderRadius: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    borderRadius: 20,
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 8,
   },
   viewButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#5D4037',
-    marginRight: 4,
+    color: baseTheme.palette.brandBrown,
+    fontWeight: '600',
+    marginRight: 6,
   },
-  certifiedBadge: {
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: baseTheme.palette.textPrimary,
+  },
+  sectionLink: {
+    color: baseTheme.palette.brandBrown,
+    fontWeight: '600',
+  },
+  listingGrid: {
+    gap: 12,
+  },
+  listingCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8F5E9',
-    borderRadius: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginLeft: 8,
+    ...baseTheme.shadows.card,
   },
-  certifiedText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#4CAF50',
-    marginLeft: 2,
+  listingImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    marginRight: 14,
+  },
+  listingContent: {
+    flex: 1,
+  },
+  listingName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: baseTheme.palette.textPrimary,
+  },
+  listingMeta: {
+    color: baseTheme.palette.textSecondary,
+    marginTop: 2,
+  },
+  listingButton: {
+    backgroundColor: baseTheme.palette.brandAmber,
+    borderRadius: 14,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  listingButtonText: {
+    fontWeight: '700',
+    color: baseTheme.palette.brandBrown,
   },
   errorBox: {
     flex: 1,
@@ -490,20 +743,19 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginTop: 16,
-    color: '#F44336',
+    color: baseTheme.palette.danger,
     fontSize: 16,
     textAlign: 'center',
-    marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: '#795548',
-    borderRadius: 20,
+    backgroundColor: baseTheme.palette.brandBrown,
     paddingHorizontal: 20,
     paddingVertical: 10,
+    borderRadius: 16,
+    marginTop: 12,
   },
   retryButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
     fontWeight: '600',
   },
 });

@@ -12,8 +12,8 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Caff.io API')
-    .setDescription('Coffee Hub API documentation')
+    .setTitle('Caffio API')
+    .setDescription('Caffio platform API documentation')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
