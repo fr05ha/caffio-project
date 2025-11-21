@@ -16,20 +16,22 @@ async function seedAll() {
   console.log('🌱 Starting full database seeding...\n');
 
   try {
-    // 1. Сидирование базовых кафе (если их нет)
+    // 1. Сидирование базовых кафе (проверяем каждое индивидуально)
     console.log('📦 Step 1: Seeding cafes...');
-    const existingCafes = await db.cafe.count();
-    if (existingCafes === 0) {
-      await db.cafe.createMany({
-        data: [
-          { name: 'Single O Surry Hills', address: 'Reservoir St, Surry Hills NSW', lat: -33.882, lon: 151.209, ratingAvg: 4.7, ratingCount: 241, isCertified: true },
-          { name: 'Mecca Coffee King St', address: 'King St, Sydney NSW', lat: -33.871, lon: 151.207, ratingAvg: 4.6, ratingCount: 180 },
-          { name: 'Reuben Hills', address: 'Albion St, Surry Hills NSW', lat: -33.8847, lon: 151.2113, ratingAvg: 4.65, ratingCount: 210, isCertified: true }
-        ]
-      });
-      console.log('✅ Cafes created');
-    } else {
-      console.log(`⏭️  ${existingCafes} cafes already exist, skipping`);
+    const baseCafes = [
+      { name: 'Single O Surry Hills', address: 'Reservoir St, Surry Hills NSW', lat: -33.882, lon: 151.209, ratingAvg: 4.7, ratingCount: 241, isCertified: true },
+      { name: 'Mecca Coffee King St', address: 'King St, Sydney NSW', lat: -33.871, lon: 151.207, ratingAvg: 4.6, ratingCount: 180 },
+      { name: 'Reuben Hills', address: 'Albion St, Surry Hills NSW', lat: -33.8847, lon: 151.2113, ratingAvg: 4.65, ratingCount: 210, isCertified: true }
+    ];
+
+    for (const cafeData of baseCafes) {
+      const existing = await db.cafe.findFirst({ where: { name: cafeData.name } });
+      if (!existing) {
+        await db.cafe.create({ data: cafeData });
+        console.log(`✅ Created cafe: ${cafeData.name}`);
+      } else {
+        console.log(`⏭️  Cafe "${cafeData.name}" already exists, skipping`);
+      }
     }
 
     // 2. Добавление Oh Matcha (если нет)
