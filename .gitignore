@@ -66,3 +66,9 @@ apps/backend/node_modules/
 
 # Web admin (frozen)
 web-admin/
+
+# Deployment manuals (created during setup)
+RENDER_DEPLOY.md
+FRONTEND_DEPLOY.md
+DEPLOYMENT_CHECKLIST.md
+NEXT_STEPS.md
