@@ -1,7 +1,7 @@
 // API service for the Caffio mobile app
 // Use your Mac's local IP for Expo Go on physical device
 // For iOS Simulator, use 'http://localhost:3000'
-const API_BASE_URL = 'http://10.1.1.146:3000';
+const API_BASE_URL = 'https://caffio-project.onrender.com';
 
 export interface Cafe {
   id: number;
