@@ -5,14 +5,13 @@ import {
   LayoutDashboard,
   ShoppingBag,
   Star,
-  Menu as MenuIcon,
   Truck,
   Settings,
   LogOut,
-  Coffee,
   UtensilsCrossed,
 } from 'lucide-react';
 import { cn } from '../ui/utils';
+import caffioLogo from '../../assets/caffio-logo.png';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -38,11 +37,11 @@ export function DashboardLayout({ children, currentPage, onPageChange, onLogout,
       <aside className="w-64 bg-white border-r flex flex-col">
         <div className="p-6 border-b">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--primary-color, #f59e0b)' }}>
-              <Coffee className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--primary-color, #f59e0b)' }}>
+              <img src={caffioLogo} alt="Caffio Logo" className="w-8 h-8 object-contain" />
             </div>
             <div>
-              <h2 className="text-sm">CoffeeGo Admin</h2>
+              <h2 className="text-sm">Caffio Admin</h2>
               <p className="text-xs text-gray-600">{cafeName || 'Cafe'}</p>
             </div>
           </div>

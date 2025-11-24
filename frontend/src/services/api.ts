@@ -6,8 +6,15 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`HTTP ${res.status} ${res.statusText}: ${text}`);
+    let errorMessage = `HTTP ${res.status} ${res.statusText}`;
+    try {
+      const errorData = await res.json();
+      errorMessage = errorData.message || errorData.error || errorMessage;
+    } catch {
+      const text = await res.text().catch(() => '');
+      if (text) errorMessage = text;
+    }
+    throw new Error(errorMessage);
   }
   return res.json() as Promise<T>;
 }
@@ -97,8 +104,25 @@ export type LoginResponse = {
   cafe: Cafe;
 };
 
+export type SignupData = {
+  email: string;
+  password: string;
+  cafeName: string;
+  address?: string;
+  lat?: number;
+  lon?: number;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  logoUrl?: string;
+  theme?: string;
+};
+
 export const authApi = {
   login(email: string, password: string): Promise<LoginResponse> {
     return http('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+  },
+  signup(data: SignupData): Promise<LoginResponse> {
+    return http('/auth/signup', { method: 'POST', body: JSON.stringify(data) });
   },
 };
