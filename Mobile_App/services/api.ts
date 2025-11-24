@@ -74,7 +74,27 @@ class ApiService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Try to get error message from response
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          // If response is not JSON, try text
+          try {
+            const errorText = await response.text();
+            if (errorText) errorMessage = errorText;
+          } catch {
+            // Ignore
+          }
+        }
+        console.error(`API request failed for ${endpoint}:`, {
+          status: response.status,
+          statusText: response.statusText,
+          message: errorMessage,
+          url,
+        });
+        throw new Error(errorMessage);
       }
 
       return await response.json();
