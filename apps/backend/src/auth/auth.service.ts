@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import * as bcrypt from 'bcrypt';
+import { URLSearchParams } from 'url';
 
 @Injectable()
 export class AuthService {
@@ -58,6 +59,18 @@ export class AuthService {
     // Hash password
     const passwordHash = await this.hashPassword(data.password);
 
+    // Derive location automatically when possible
+    let latitude = typeof data.lat === 'number' ? data.lat : undefined;
+    let longitude = typeof data.lon === 'number' ? data.lon : undefined;
+
+    if ((latitude === undefined || longitude === undefined) && data.address) {
+      const geocoded = await this.geocodeAddress(data.address);
+      if (geocoded) {
+        latitude = geocoded.lat;
+        longitude = geocoded.lon;
+      }
+    }
+
     // Create cafe and user in a transaction
     const result = await this.db.$transaction(async (tx) => {
       // Create cafe
@@ -65,8 +78,8 @@ export class AuthService {
         data: {
           name: data.cafeName,
           address: data.address || null,
-          lat: data.lat || 0, // Default to 0 if not provided
-          lon: data.lon || 0,
+          lat: latitude ?? 0, // Default to 0 if not provided
+          lon: longitude ?? 0,
           primaryColor: data.primaryColor || null,
           secondaryColor: data.secondaryColor || null,
           accentColor: data.accentColor || null,
@@ -97,6 +110,40 @@ export class AuthService {
       user: userWithoutPassword,
       cafe: result.cafe,
     };
+  }
+
+  private async geocodeAddress(address: string): Promise<{ lat: number; lon: number } | null> {
+    const params = new URLSearchParams({
+      q: address,
+      format: 'json',
+      limit: '1',
+    });
+    const url = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'CaffioDashboard/1.0 (+https://caffio-project.vercel.app)',
+        },
+      });
+      if (!response.ok) {
+        return null;
+      }
+      const results = (await response.json()) as Array<{ lat: string; lon: string }>;
+      if (!Array.isArray(results) || results.length === 0) {
+        return null;
+      }
+      const first = results[0];
+      const lat = parseFloat(first.lat);
+      const lon = parseFloat(first.lon);
+      if (Number.isNaN(lat) || Number.isNaN(lon)) {
+        return null;
+      }
+      return { lat, lon };
+    } catch (error) {
+      console.error('Failed to geocode address', error);
+      return null;
+    }
   }
 }
 

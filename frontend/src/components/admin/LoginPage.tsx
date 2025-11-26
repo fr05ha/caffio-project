@@ -22,8 +22,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   // Signup fields
   const [cafeName, setCafeName] = useState('');
   const [address, setAddress] = useState('');
-  const [lat, setLat] = useState('');
-  const [lon, setLon] = useState('');
   const [primaryColor, setPrimaryColor] = useState('#8B4513');
   const [secondaryColor, setSecondaryColor] = useState('#D2691E');
   const [accentColor, setAccentColor] = useState('#CD853F');
@@ -54,8 +52,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password || !cafeName) {
-      toast.error('Please fill in all required fields');
+    if (!email || !password || !cafeName || !address.trim()) {
+      toast.error('Please fill in all required fields, including your cafe address');
       return;
     }
 
@@ -67,8 +65,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         password,
         cafeName,
         address: address || undefined,
-        lat: lat ? parseFloat(lat) : undefined,
-        lon: lon ? parseFloat(lon) : undefined,
         primaryColor: primaryColor || undefined,
         secondaryColor: secondaryColor || undefined,
         accentColor: accentColor || undefined,
@@ -196,7 +192,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
 
             <div>
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="address">Cafe Address *</Label>
               <Input
                 id="address"
                 type="text"
@@ -204,35 +200,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 className="mt-1"
+                required
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="lat">Latitude</Label>
-                <Input
-                  id="lat"
-                  type="number"
-                  step="any"
-                  placeholder="-33.8688"
-                  value={lat}
-                  onChange={(e) => setLat(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="lon">Longitude</Label>
-                <Input
-                  id="lon"
-                  type="number"
-                  step="any"
-                  placeholder="151.2093"
-                  value={lon}
-                  onChange={(e) => setLon(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                We&apos;ll automatically detect the location on the map using this address—no latitude/longitude needed.
+              </p>
             </div>
 
             <div className="border-t pt-4">
