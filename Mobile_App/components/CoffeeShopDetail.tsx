@@ -59,6 +59,8 @@ export default function CoffeeShopDetail({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'menu' | 'reviews' | 'info'>('menu');
+  const [showOrderDialog, setShowOrderDialog] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState('');
 
   const formatBusinessHours = (hours: BusinessHours | undefined): string => {
     if (!hours || typeof hours !== 'object') {
