@@ -53,6 +53,7 @@ model MenuItem {
   description String?
   price       Float
   currency    String                     @default("AUD")
+  imageUrl    String?
   favoritedBy CustomerFavoriteMenuItem[]
   menu        Menu                       @relation(fields: [menuId], references: [id])
 }

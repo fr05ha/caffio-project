@@ -125,13 +125,14 @@ export default function App() {
         name: item.name,
         description: item.description,
         price: item.price,
+        imageUrl: item.image, // Send image URL to backend
       });
       const mapped: MenuItem = {
         id: String(created.id),
         name: created.name,
         description: created.description || '',
         price: created.price,
-        image: item.image,
+        image: created.imageUrl || item.image, // Use imageUrl from backend response
         category: item.category,
         available: item.available,
       };
@@ -151,6 +152,7 @@ export default function App() {
           name: updates.name,
           description: updates.description,
           price: updates.price,
+          imageUrl: updates.image, // Send image URL to backend
         });
       }
       setMenuItems(menuItems.map((item: MenuItem) =>
