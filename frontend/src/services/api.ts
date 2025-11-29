@@ -73,6 +73,36 @@ export type ReviewDto = {
   createdAt: string;
 };
 
+export type OrderItemDto = {
+  id: number;
+  menuItemId: number;
+  quantity: number;
+  price: number;
+  name: string;
+  description?: string | null;
+};
+
+export type OrderDto = {
+  id: number;
+  customerId: number;
+  cafeId: number;
+  status: 'pending' | 'preparing' | 'ready' | 'on_the_way' | 'delivered' | 'cancelled';
+  total: number;
+  deliveryAddress?: string | null;
+  customerPhone?: string | null;
+  customerName?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  items: OrderItemDto[];
+  cafe?: Cafe;
+  customer?: {
+    id: number;
+    name?: string | null;
+    email: string;
+  };
+};
+
 export const api = {
   // Cafes
   listCafes(): Promise<Cafe[]> {
@@ -120,6 +150,17 @@ export const api = {
   },
   createReview(data: { cafeId: number; rating: number; text?: string }): Promise<ReviewDto> {
     return http('/reviews', { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  // Orders
+  getOrdersByCafe(cafeId: number): Promise<OrderDto[]> {
+    return http(`/orders?cafeId=${cafeId}`);
+  },
+  getOrderById(orderId: number): Promise<OrderDto> {
+    return http(`/orders/${orderId}`);
+  },
+  updateOrderStatus(orderId: number, status: string): Promise<OrderDto> {
+    return http(`/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
   },
 };
 

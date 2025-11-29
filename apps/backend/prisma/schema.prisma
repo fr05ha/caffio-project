@@ -29,6 +29,7 @@ model Cafe {
   favoritedBy    CustomerFavoriteCafe[]
   menus          Menu[]
   reviews        Review[]
+  orders         Order[]
   user           User?
 }
 
@@ -59,6 +60,7 @@ model MenuItem {
   currency    String                     @default("AUD")
   imageUrl    String?
   favoritedBy CustomerFavoriteMenuItem[]
+  orderItems  OrderItem[]
   menu        Menu                       @relation(fields: [menuId], references: [id])
 }
 
@@ -79,6 +81,7 @@ model Customer {
   createdAt         DateTime                   @default(now())
   favoriteCafes     CustomerFavoriteCafe[]
   favoriteMenuItems CustomerFavoriteMenuItem[]
+  orders            Order[]
 }
 
 model CustomerFavoriteCafe {
@@ -101,4 +104,33 @@ model CustomerFavoriteMenuItem {
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
 
   @@unique([customerId, menuItemId])
+}
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  customerId      Int
+  cafeId          Int
+  status          String      @default("pending") // pending, preparing, ready, on_the_way, delivered, cancelled
+  total           Float
+  deliveryAddress String?
+  customerPhone   String?
+  customerName    String?
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  customer        Customer    @relation(fields: [customerId], references: [id])
+  cafe            Cafe        @relation(fields: [cafeId], references: [id])
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id          Int      @id @default(autoincrement())
+  orderId     Int
+  menuItemId  Int
+  quantity    Int
+  price       Float   // Price at time of order
+  name        String   // Item name at time of order
+  description String?
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem    MenuItem @relation(fields: [menuItemId], references: [id])
 }

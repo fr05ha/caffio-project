@@ -22,7 +22,7 @@ export default function App() {
   const handlePageChange = (page: string) => {
     setCurrentPage(page as Page);
   };
-  const [orders, setOrders] = useState<Order[]>(adminOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>(customerMenuItems?.['1'] ?? []);
   const reviewsList = useState<Review[]>(reviews)[0];
   const [backendAverageRating, setBackendAverageRating] = useState<number>(0);
@@ -39,6 +39,7 @@ export default function App() {
         // Clear menu items when no cafe selected
         setMenuItems([]);
         setSelectedMenuId(null);
+        setOrders([]);
         return;
       }
       
@@ -70,12 +71,39 @@ export default function App() {
         } else {
           setBackendAverageRating(0);
         }
+
+        // Load orders for cafe
+        const ordersData = await api.getOrdersByCafe(selectedCafeId);
+        const mappedOrders: Order[] = ordersData.map((order) => ({
+          id: String(order.id),
+          shopId: String(order.cafeId),
+          shopName: order.cafe?.name || 'Unknown Cafe',
+          customerName: order.customerName || order.customer?.name || 'Unknown Customer',
+          customerPhone: order.customerPhone || '',
+          items: order.items.map((item) => ({
+            id: String(item.menuItemId),
+            name: item.name,
+            description: item.description || '',
+            price: item.price,
+            image: '',
+            category: '',
+            quantity: item.quantity,
+            shopId: String(order.cafeId),
+            shopName: order.cafe?.name || 'Unknown Cafe',
+          })),
+          total: order.total,
+          status: order.status,
+          orderTime: order.createdAt,
+          deliveryAddress: order.deliveryAddress || '',
+        }));
+        setOrders(mappedOrders);
       } catch (e) {
         // Clear on error and log
         console.warn('Failed to load from API, clearing menu data', e);
         setMenuItems([]);
         setSelectedMenuId(null);
         setBackendAverageRating(0);
+        setOrders([]);
       }
     }
     loadData();
@@ -99,10 +127,21 @@ export default function App() {
     toast.info('Logged out successfully');
   };
 
-  const handleUpdateOrderStatus = (orderId: string, status: Order['status']) => {
-    setOrders(orders.map((order: Order) =>
-      order.id === orderId ? { ...order, status } : order
-    ));
+  const handleUpdateOrderStatus = async (orderId: string, status: Order['status']) => {
+    try {
+      const orderIdNum = parseInt(orderId);
+      if (isNaN(orderIdNum)) {
+        toast.error('Invalid order ID');
+        return;
+      }
+      await api.updateOrderStatus(orderIdNum, status);
+      setOrders(orders.map((order: Order) =>
+        order.id === orderId ? { ...order, status } : order
+      ));
+      toast.success(`Order ${orderId} updated to ${status}`);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update order status');
+    }
   };
 
   const handleAddMenuItem = async (item: Omit<MenuItem, 'id'>) => {

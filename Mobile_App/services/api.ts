@@ -3,6 +3,14 @@
 // For iOS Simulator, use 'http://localhost:3000'
 const API_BASE_URL = 'https://caffio-project.onrender.com';
 
+export interface BusinessHours {
+  [key: string]: {
+    open: string;
+    close: string;
+    enabled: boolean;
+  };
+}
+
 export interface Cafe {
   id: number;
   name: string;
@@ -18,6 +26,11 @@ export interface Cafe {
   primaryColor?: string;
   secondaryColor?: string;
   accentColor?: string;
+  phone?: string;
+  email?: string;
+  description?: string;
+  businessHours?: BusinessHours;
+  isOpen?: boolean;
 }
 
 export interface Menu {
@@ -192,6 +205,56 @@ class ApiService {
       method: 'DELETE',
     });
   }
+
+  // Orders API
+  async createOrder(data: {
+    customerId: number;
+    cafeId: number;
+    items: Array<{ menuItemId: number; quantity: number }>;
+    deliveryAddress?: string;
+    customerPhone?: string;
+    customerName?: string;
+    notes?: string;
+  }): Promise<Order> {
+    return this.request<Order>('/orders', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getOrdersByCustomer(customerId: number): Promise<Order[]> {
+    return this.request<Order[]>(`/orders?customerId=${customerId}`);
+  }
+
+  async getOrderById(orderId: number): Promise<Order> {
+    return this.request<Order>(`/orders/${orderId}`);
+  }
+}
+
+export interface OrderItem {
+  id: number;
+  menuItemId: number;
+  quantity: number;
+  price: number;
+  name: string;
+  description?: string;
+}
+
+export interface Order {
+  id: number;
+  customerId: number;
+  cafeId: number;
+  status: 'pending' | 'preparing' | 'ready' | 'on_the_way' | 'delivered' | 'cancelled';
+  total: number;
+  deliveryAddress?: string;
+  customerPhone?: string;
+  customerName?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  items: OrderItem[];
+  cafe?: Cafe;
+  customer?: Customer;
 }
 
 export const apiService = new ApiService();

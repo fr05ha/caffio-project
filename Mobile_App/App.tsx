@@ -18,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { apiService, Cafe, Customer } from './services/api';
 import { LocationService, LocationData } from './services/location';
 import CoffeeShopDetail from './components/CoffeeShopDetail';
+import OrdersView from './components/OrdersView';
 import AuthScreen from './components/auth/AuthScreen';
 import { baseTheme } from './theme';
 
@@ -68,6 +69,7 @@ export default function App() {
   const [coffeeShops, setCoffeeShops] = useState<CoffeeShop[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedCafeId, setSelectedCafeId] = useState<number | null>(null);
+  const [showOrders, setShowOrders] = useState<boolean>(false);
   const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null);
   const [favoriteCafeIds, setFavoriteCafeIds] = useState<number[]>([]);
   const [favoriteMenuItemIds, setFavoriteMenuItemIds] = useState<number[]>([]);
@@ -109,9 +111,9 @@ export default function App() {
               LocationService.calculateDistance(location.latitude, location.longitude, cafe.lat, cafe.lon),
             )
           : `${(index + 1) * 200}m`,
-        isOpen: true,
+        isOpen: cafe.isOpen ?? true, // Use isOpen from API, default to true if not available
         isCertified: cafe.isCertified,
-        description: `Rated by ${cafe.ratingCount} customers`,
+        description: cafe.description || `Rated by ${cafe.ratingCount} customers`,
         priceRange: '$$',
         image:
           cafe.imageUrl ||
@@ -283,15 +285,31 @@ export default function App() {
     return <AuthScreen loading={authLoading} onLogin={handleLogin} onSignup={handleSignup} />;
   }
 
+  if (showOrders && currentCustomer) {
+    return (
+      <OrdersView
+        customerId={currentCustomer.id}
+        onBack={() => setShowOrders(false)}
+      />
+    );
+  }
+
   if (selectedCafeId !== null) {
     return (
       <CoffeeShopDetail
         cafeId={selectedCafeId}
         onBack={handleBack}
+        customerId={currentCustomer?.id}
+        customerName={currentCustomer?.name || undefined}
+        customerPhone={undefined} // Can be added later if stored
         isFavoriteCafe={favoriteCafeIds.includes(selectedCafeId)}
         favoriteMenuItemIds={favoriteMenuItemIds}
         onToggleCafeFavorite={toggleCafeFavorite}
         onToggleMenuItemFavorite={toggleMenuItemFavorite}
+        onOrderPlaced={(order) => {
+          // Order placed, could navigate to order tracking
+          console.log('Order placed:', order);
+        }}
       />
     );
   }
@@ -306,10 +324,16 @@ export default function App() {
               {favoriteCafeIds.length} favorites • {favoriteMenuItemIds.length} drinks saved
             </Text>
           </View>
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <Ionicons name="log-out-outline" size={20} color={baseTheme.palette.brandBrown} />
-            <Text style={styles.logoutText}>Logout</Text>
-          </TouchableOpacity>
+          <View style={styles.topBarActions}>
+            <TouchableOpacity onPress={() => setShowOrders(true)} style={styles.ordersButton}>
+              <Ionicons name="receipt-outline" size={20} color={baseTheme.palette.brandBrown} />
+              <Text style={styles.ordersButtonText}>Orders</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+              <Ionicons name="log-out-outline" size={20} color={baseTheme.palette.brandBrown} />
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.heroCard}>
@@ -462,6 +486,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: baseTheme.palette.textSecondary,
     marginTop: 2,
+  },
+  topBarActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  ordersButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: baseTheme.palette.sand,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  ordersButtonText: {
+    marginLeft: 4,
+    fontSize: 14,
+    fontWeight: '600',
+    color: baseTheme.palette.brandBrown,
   },
   logoutButton: {
     flexDirection: 'row',
