@@ -3,6 +3,7 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
 import { toast } from 'sonner';
 import { authApi, Cafe, SignupData } from '../../services/api';
 import caffioLogo from '../../assets/caffio-logo.png';
@@ -22,6 +23,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   // Signup fields
   const [cafeName, setCafeName] = useState('');
   const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState('');
+  const [cafeEmail, setCafeEmail] = useState('');
+  const [description, setDescription] = useState('');
   const [primaryColor, setPrimaryColor] = useState('#8B4513');
   const [secondaryColor, setSecondaryColor] = useState('#D2691E');
   const [accentColor, setAccentColor] = useState('#CD853F');
@@ -65,6 +69,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         password,
         cafeName,
         address: address || undefined,
+        phone: phone || undefined,
+        cafeEmail: cafeEmail || undefined,
+        description: description || undefined,
         primaryColor: primaryColor || undefined,
         secondaryColor: secondaryColor || undefined,
         accentColor: accentColor || undefined,
@@ -205,6 +212,44 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               <p className="text-xs text-gray-500 mt-1">
                 We&apos;ll automatically detect the location on the map using this address—no latitude/longitude needed.
               </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+61 2 1234 5678"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="cafe-email">Cafe Contact Email</Label>
+                <Input
+                  id="cafe-email"
+                  type="email"
+                  placeholder="contact@cafe.com"
+                  value={cafeEmail}
+                  onChange={(e) => setCafeEmail(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="description">Cafe Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Tell customers about your cafe..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="mt-1"
+                rows={3}
+              />
             </div>
 
             <div className="border-t pt-4">

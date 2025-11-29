@@ -218,7 +218,7 @@ export default function App() {
           {currentPage === 'delivery' && (
             <DeliveryPage drivers={deliveryDrivers} orders={orders} />
           )}
-          {currentPage === 'settings' && <SettingsPage />}
+          {currentPage === 'settings' && <SettingsPage cafeId={selectedCafeId} />}
         </DashboardLayout>
       )}
     </>

@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Query, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiQuery, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Put, Param, Query, Body, ParseIntPipe } from '@nestjs/common';
+import { ApiTags, ApiQuery, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CafesService } from './cafes.service';
 
 @ApiTags('cafes')
@@ -20,6 +20,51 @@ export class CafesController {
   @Get(':id')
   @ApiParam({ name: 'id', type: Number })
   async getById(@Param('id', ParseIntPipe) id: number) {
-    return this.cafesService.getById(id);
+    const cafe = await this.cafesService.getById(id);
+    if (cafe) {
+      // Add isOpen status based on business hours
+      const isOpen = this.cafesService.isCafeOpen(cafe.businessHours as any);
+      return { ...cafe, isOpen };
+    }
+    return cafe;
+  }
+
+  @Put(':id')
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({
+    schema: {
+      properties: {
+        name: { type: 'string' },
+        address: { type: 'string' },
+        phone: { type: 'string' },
+        email: { type: 'string' },
+        description: { type: 'string' },
+        primaryColor: { type: 'string' },
+        secondaryColor: { type: 'string' },
+        accentColor: { type: 'string' },
+        logoUrl: { type: 'string' },
+        theme: { type: 'string' },
+        businessHours: { type: 'object' },
+      },
+    },
+  })
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body()
+    data: {
+      name?: string;
+      address?: string;
+      phone?: string;
+      email?: string;
+      description?: string;
+      primaryColor?: string;
+      secondaryColor?: string;
+      accentColor?: string;
+      logoUrl?: string;
+      theme?: string;
+      businessHours?: any;
+    },
+  ) {
+    return this.cafesService.update(id, data);
   }
 }

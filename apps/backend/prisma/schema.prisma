@@ -22,6 +22,10 @@ model Cafe {
   primaryColor   String?
   secondaryColor String?
   theme          String?
+  phone          String?
+  email          String?
+  description    String?
+  businessHours  Json?
   favoritedBy    CustomerFavoriteCafe[]
   menus          Menu[]
   reviews        Review[]

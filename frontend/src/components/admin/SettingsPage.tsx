@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -9,24 +9,152 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Separator } from '../ui/separator';
 import { Store, Clock, DollarSign, Bell } from 'lucide-react';
 import { toast } from 'sonner';
+import { api, Cafe, BusinessHours } from '../../services/api';
 
-export function SettingsPage() {
-  const [shopName, setShopName] = useState('Oh Matcha');
-  const [shopDescription, setShopDescription] = useState('Authentic Japanese matcha, desserts, and drinks. Dairy-free options available.');
+interface SettingsPageProps {
+  cafeId: number | null;
+}
+
+const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
+const DAY_LABELS: Record<string, string> = {
+  monday: 'Monday',
+  tuesday: 'Tuesday',
+  wednesday: 'Wednesday',
+  thursday: 'Thursday',
+  friday: 'Friday',
+  saturday: 'Saturday',
+  sunday: 'Sunday',
+};
+
+function isCafeOpen(businessHours: BusinessHours | null | undefined): boolean {
+  if (!businessHours || typeof businessHours !== 'object') {
+    return false;
+  }
+
+  const now = new Date();
+  const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][now.getDay()];
+  const dayHours = businessHours[dayName];
+
+  if (!dayHours || !dayHours.enabled) {
+    return false;
+  }
+
+  const currentTime = now.getHours() * 60 + now.getMinutes();
+  const [openHour, openMin] = dayHours.open.split(':').map(Number);
+  const [closeHour, closeMin] = dayHours.close.split(':').map(Number);
+  const openTime = openHour * 60 + openMin;
+  const closeTime = closeHour * 60 + closeMin;
+
+  return currentTime >= openTime && currentTime < closeTime;
+}
+
+export function SettingsPage({ cafeId }: SettingsPageProps) {
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [shopName, setShopName] = useState('');
+  const [shopDescription, setShopDescription] = useState('');
   const [shopPhone, setShopPhone] = useState('');
-  const [shopAddress, setShopAddress] = useState('Shop 11/501 George St, Sydney NSW 2000');
+  const [shopEmail, setShopEmail] = useState('');
+  const [shopAddress, setShopAddress] = useState('');
+  
+  const [businessHours, setBusinessHours] = useState<BusinessHours>(() => {
+    const defaultHours: BusinessHours = {} as BusinessHours;
+    DAYS.forEach(day => {
+      defaultHours[day] = { open: '08:00', close: '20:00', enabled: true };
+    });
+    return defaultHours;
+  });
+  
+  const [isOpen, setIsOpen] = useState(false);
+  const [acceptOrders, setAcceptOrders] = useState(true);
   
   const [deliveryFee, setDeliveryFee] = useState('2.99');
   const [minOrder, setMinOrder] = useState('10.00');
   const [deliveryRadius, setDeliveryRadius] = useState('5');
   
-  const [isOpen, setIsOpen] = useState(true);
-  const [acceptOrders, setAcceptOrders] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [smsNotifications, setSmsNotifications] = useState(false);
 
-  const handleSaveShopInfo = () => {
-    toast.success('Shop information updated successfully');
+  // Load cafe data on mount
+  useEffect(() => {
+    if (!cafeId) return;
+    
+    async function loadCafeData() {
+      setLoading(true);
+      try {
+        const cafe = await api.getCafe(cafeId);
+        setShopName(cafe.name || '');
+        setShopDescription(cafe.description || '');
+        setShopPhone(cafe.phone || '');
+        setShopEmail(cafe.email || '');
+        setShopAddress(cafe.address || '');
+        if (cafe.businessHours) {
+          setBusinessHours(cafe.businessHours);
+        }
+        if (cafe.isOpen !== undefined) {
+          setIsOpen(cafe.isOpen);
+        }
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to load cafe data');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    loadCafeData();
+  }, [cafeId]);
+
+  // Update isOpen status based on business hours
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsOpen(isCafeOpen(businessHours));
+    }, 60000); // Check every minute
+
+    setIsOpen(isCafeOpen(businessHours));
+    return () => clearInterval(interval);
+  }, [businessHours]);
+
+  const handleSaveShopInfo = async () => {
+    if (!cafeId) {
+      toast.error('No cafe selected');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await api.updateCafe(cafeId, {
+        name: shopName,
+        address: shopAddress,
+        phone: shopPhone,
+        email: shopEmail,
+        description: shopDescription,
+      });
+      toast.success('Shop information updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update shop information');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveBusinessHours = async () => {
+    if (!cafeId) {
+      toast.error('No cafe selected');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await api.updateCafe(cafeId, {
+        businessHours,
+      });
+      toast.success('Business hours updated successfully');
+      setIsOpen(isCafeOpen(businessHours)); // Update status immediately
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update business hours');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSaveDelivery = () => {
@@ -36,6 +164,26 @@ export function SettingsPage() {
   const handleSaveNotifications = () => {
     toast.success('Notification preferences updated');
   };
+
+  if (!cafeId) {
+    return (
+      <div className="p-6">
+        <div className="text-center py-12">
+          <p className="text-gray-600">Please log in to manage your cafe settings</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="text-center py-12">
+          <p className="text-gray-600">Loading cafe settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -97,15 +245,17 @@ export function SettingsPage() {
                     className="mt-1"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="shop-email">Email</Label>
-                  <Input
-                    id="shop-email"
-                    type="email"
-                    defaultValue="contact@brewandbean.com"
-                    className="mt-1"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="shop-email">Email</Label>
+                <Input
+                  id="shop-email"
+                  type="email"
+                  value={shopEmail}
+                  onChange={(e) => setShopEmail(e.target.value)}
+                  placeholder="contact@cafe.com"
+                  className="mt-1"
+                />
+              </div>
               </div>
 
               <div>
@@ -120,16 +270,22 @@ export function SettingsPage() {
 
               <Separator />
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <Label htmlFor="shop-open">Shop is Open</Label>
-                  <p className="text-sm text-gray-600">Toggle to open/close your shop</p>
+                  <Label htmlFor="shop-open" className="text-base font-semibold">
+                    Shop Status: <span className={isOpen ? 'text-green-600' : 'text-red-600'}>
+                      {isOpen ? 'OPEN' : 'CLOSED'}
+                    </span>
+                  </Label>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {isOpen 
+                      ? 'Your shop is currently open based on business hours'
+                      : 'Your shop is currently closed based on business hours'}
+                  </p>
                 </div>
-                <Switch
-                  id="shop-open"
-                  checked={isOpen}
-                  onCheckedChange={setIsOpen}
-                />
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${isOpen ? 'bg-green-500' : 'bg-red-500'}`} />
+                </div>
               </div>
 
               <div className="flex items-center justify-between">
@@ -144,7 +300,9 @@ export function SettingsPage() {
                 />
               </div>
 
-              <Button onClick={handleSaveShopInfo}>Save Changes</Button>
+              <Button onClick={handleSaveShopInfo} disabled={saving || loading}>
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
             </div>
           </Card>
         </TabsContent>
@@ -228,19 +386,64 @@ export function SettingsPage() {
             </div>
 
             <div className="space-y-4 max-w-2xl">
-              {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-                <div key={day} className="flex items-center gap-4">
-                  <div className="w-32">
-                    <Label>{day}</Label>
+              {DAYS.map((day) => {
+                const dayHours = businessHours[day] || { open: '08:00', close: '20:00', enabled: true };
+                return (
+                  <div key={day} className="flex items-center gap-4 p-3 border rounded-lg">
+                    <div className="w-32">
+                      <Label>{DAY_LABELS[day]}</Label>
+                    </div>
+                    <Input
+                      type="time"
+                      value={dayHours.open}
+                      onChange={(e) => {
+                        setBusinessHours({
+                          ...businessHours,
+                          [day]: { ...dayHours, open: e.target.value },
+                        });
+                      }}
+                      className="flex-1"
+                      disabled={!dayHours.enabled}
+                    />
+                    <span className="text-gray-600">to</span>
+                    <Input
+                      type="time"
+                      value={dayHours.close}
+                      onChange={(e) => {
+                        setBusinessHours({
+                          ...businessHours,
+                          [day]: { ...dayHours, close: e.target.value },
+                        });
+                      }}
+                      className="flex-1"
+                      disabled={!dayHours.enabled}
+                    />
+                    <Switch
+                      checked={dayHours.enabled}
+                      onCheckedChange={(checked) => {
+                        setBusinessHours({
+                          ...businessHours,
+                          [day]: { ...dayHours, enabled: checked },
+                        });
+                      }}
+                    />
                   </div>
-                  <Input type="time" defaultValue="08:00" className="flex-1" />
-                  <span className="text-gray-600">to</span>
-                  <Input type="time" defaultValue="20:00" className="flex-1" />
-                  <Switch defaultChecked />
-                </div>
-              ))}
+                );
+              })}
               
-              <Button>Save Hours</Button>
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Current Status:</strong> Your shop is currently{' '}
+                  <span className={isOpen ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                    {isOpen ? 'OPEN' : 'CLOSED'}
+                  </span>
+                  {' '}based on today&apos;s business hours.
+                </p>
+              </div>
+              
+              <Button onClick={handleSaveBusinessHours} disabled={saving || loading}>
+                {saving ? 'Saving...' : 'Save Hours'}
+              </Button>
             </div>
           </Card>
         </TabsContent>

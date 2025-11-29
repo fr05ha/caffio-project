@@ -19,6 +19,14 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export type BusinessHours = {
+  [key: string]: {
+    open: string;
+    close: string;
+    enabled: boolean;
+  };
+};
+
 export type Cafe = {
   id: number;
   name: string;
@@ -33,6 +41,11 @@ export type Cafe = {
   accentColor?: string | null;
   logoUrl?: string | null;
   theme?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  businessHours?: BusinessHours | null;
+  isOpen?: boolean;
 };
 
 export type MenuItemDto = {
@@ -67,6 +80,21 @@ export const api = {
   },
   getCafe(id: number): Promise<Cafe & { menus: MenuDto[]; reviews: ReviewDto[] }> {
     return http(`/cafes/${id}`);
+  },
+  updateCafe(id: number, data: {
+    name?: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    description?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+    accentColor?: string;
+    logoUrl?: string;
+    theme?: string;
+    businessHours?: BusinessHours;
+  }): Promise<Cafe> {
+    return http(`/cafes/${id}`, { method: 'PUT', body: JSON.stringify(data) });
   },
 
   // Menus
@@ -116,6 +144,9 @@ export type SignupData = {
   accentColor?: string;
   logoUrl?: string;
   theme?: string;
+  phone?: string;
+  cafeEmail?: string;
+  description?: string;
 };
 
 export const authApi = {

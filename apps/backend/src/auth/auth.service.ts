@@ -46,6 +46,9 @@ export class AuthService {
     accentColor?: string;
     logoUrl?: string;
     theme?: string;
+    phone?: string;
+    cafeEmail?: string;
+    description?: string;
   }) {
     // Check if user already exists
     const existingUser = await this.db.user.findUnique({
@@ -85,6 +88,10 @@ export class AuthService {
           accentColor: data.accentColor || null,
           logoUrl: data.logoUrl || null,
           theme: data.theme || null,
+          phone: data.phone || undefined,
+          email: data.cafeEmail || undefined,
+          description: data.description || undefined,
+          // businessHours will be set in Settings, omit for now
           ratingAvg: 0,
           ratingCount: 0,
           isCertified: false,
