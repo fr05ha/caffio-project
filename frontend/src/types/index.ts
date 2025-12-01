@@ -25,6 +25,8 @@ export interface CartItem extends MenuItem {
   shopName: string;
 }
 
+export type OrderType = 'DINE_IN' | 'TAKE_AWAY' | 'DELIVERY';
+
 export interface Order {
   id: string;
   shopId: string;
@@ -34,6 +36,7 @@ export interface Order {
   items: CartItem[];
   total: number;
   status: 'pending' | 'preparing' | 'ready' | 'on_the_way' | 'delivered' | 'cancelled';
+  orderType?: OrderType;
   orderTime: string;
   deliveryAddress: string;
 }

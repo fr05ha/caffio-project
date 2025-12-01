@@ -106,11 +106,18 @@ model CustomerFavoriteMenuItem {
   @@unique([customerId, menuItemId])
 }
 
+enum OrderType {
+  DINE_IN
+  TAKE_AWAY
+  DELIVERY
+}
+
 model Order {
   id              Int         @id @default(autoincrement())
   customerId      Int
   cafeId          Int
   status          String      @default("pending") // pending, preparing, ready, on_the_way, delivered, cancelled
+  orderType       OrderType   @default(DELIVERY)
   total           Float
   deliveryAddress String?
   customerPhone   String?

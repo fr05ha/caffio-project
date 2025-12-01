@@ -96,9 +96,18 @@ export function OrdersPage({ orders, onUpdateOrderStatus }: OrdersPageProps) {
                       {new Date(order.orderTime).toLocaleString()}
                     </div>
                   </div>
-                  <Badge className={`${getStatusColor(order.status)} text-white`}>
-                    {order.status.replace('_', ' ')}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge className={`${getStatusColor(order.status)} text-white`}>
+                      {order.status.replace('_', ' ')}
+                    </Badge>
+                    {order.orderType && (
+                      <Badge variant="outline">
+                        {order.orderType === 'DINE_IN' ? 'Dine In' : 
+                         order.orderType === 'TAKE_AWAY' ? 'Take Away' : 
+                         'Delivery'}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -112,13 +121,15 @@ export function OrdersPage({ orders, onUpdateOrderStatus }: OrdersPageProps) {
                       {order.customerPhone}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Delivery Address</p>
-                    <p className="text-sm flex items-start gap-1">
-                      <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      {order.deliveryAddress}
-                    </p>
-                  </div>
+                  {order.orderType === 'DELIVERY' && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Delivery Address</p>
+                      <p className="text-sm flex items-start gap-1">
+                        <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        {order.deliveryAddress}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -183,9 +194,19 @@ export function OrdersPage({ orders, onUpdateOrderStatus }: OrdersPageProps) {
                           </div>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-600">Delivery Address</p>
-                          <p>{selectedOrder.deliveryAddress}</p>
+                          <p className="text-sm text-gray-600">Order Type</p>
+                          <Badge variant="outline" className="mt-1">
+                            {selectedOrder.orderType === 'DINE_IN' ? 'Dine In' : 
+                             selectedOrder.orderType === 'TAKE_AWAY' ? 'Take Away' : 
+                             'Delivery'}
+                          </Badge>
                         </div>
+                        {selectedOrder.orderType === 'DELIVERY' && (
+                          <div>
+                            <p className="text-sm text-gray-600">Delivery Address</p>
+                            <p>{selectedOrder.deliveryAddress}</p>
+                          </div>
+                        )}
                         <div>
                           <p className="text-sm text-gray-600 mb-2">Order Items</p>
                           <div className="border rounded-lg p-4 space-y-2">

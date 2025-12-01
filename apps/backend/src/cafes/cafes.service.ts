@@ -6,19 +6,44 @@ export class CafesService {
   constructor(private readonly db: PrismaService) {}
 
   async listSortedByRating() {
-    return this.db.cafe.findMany({ orderBy: { ratingAvg: 'desc' } });
+    return this.db.cafe.findMany({ 
+      orderBy: { ratingAvg: 'desc' },
+      include: {
+        menus: { include: { items: true } },
+        reviews: true,
+      },
+    });
   }
 
   async findNearest(lat: number, lon: number) {
-    // Basic nearest using computed distance formula in SQL via Prisma $queryRaw
-    return this.db.$queryRawUnsafe<any[]>(
-      `SELECT *, (6371 * acos(cos(radians($1)) * cos(radians(lat)) * cos(radians(lon) - radians($2)) + sin(radians($1)) * sin(radians(lat)))) as distance
-       FROM "Cafe"
-       ORDER BY distance ASC
-       LIMIT 20`,
-      lat,
-      lon,
-    );
+    // Get all cafes with their relations
+    const cafes = await this.db.cafe.findMany({
+      include: {
+        menus: { include: { items: true } },
+        reviews: true,
+      },
+    });
+    
+    // Calculate distance and sort
+    const cafesWithDistance = cafes.map(cafe => {
+      const distance = 6371 * Math.acos(
+        Math.cos(this.toRadians(lat)) * 
+        Math.cos(this.toRadians(cafe.lat)) * 
+        Math.cos(this.toRadians(cafe.lon) - this.toRadians(lon)) + 
+        Math.sin(this.toRadians(lat)) * 
+        Math.sin(this.toRadians(cafe.lat))
+      );
+      return { ...cafe, distance };
+    });
+    
+    // Sort by distance and return top 20
+    return cafesWithDistance
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 20);
+  }
+
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
   }
 
   async getById(id: number) {

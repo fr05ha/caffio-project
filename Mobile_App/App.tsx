@@ -111,7 +111,7 @@ export default function App() {
               LocationService.calculateDistance(location.latitude, location.longitude, cafe.lat, cafe.lon),
             )
           : `${(index + 1) * 200}m`,
-        isOpen: cafe.isOpen ?? true, // Use isOpen from API, default to true if not available
+        isOpen: cafe.isOpen ?? false, // Use isOpen from API, default to false if not available
         isCertified: cafe.isCertified,
         description: cafe.description || `Rated by ${cafe.ratingCount} customers`,
         priceRange: '$$',

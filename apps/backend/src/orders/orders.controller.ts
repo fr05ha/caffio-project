@@ -23,6 +23,7 @@ export class OrdersController {
             },
           },
         },
+        orderType: { type: 'string', enum: ['DINE_IN', 'TAKE_AWAY', 'DELIVERY'] },
         deliveryAddress: { type: 'string' },
         customerPhone: { type: 'string' },
         customerName: { type: 'string' },
@@ -34,6 +35,7 @@ export class OrdersController {
     customerId: number;
     cafeId: number;
     items: Array<{ menuItemId: number; quantity: number }>;
+    orderType?: 'DINE_IN' | 'TAKE_AWAY' | 'DELIVERY';
     deliveryAddress?: string;
     customerPhone?: string;
     customerName?: string;

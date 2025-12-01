@@ -211,6 +211,7 @@ class ApiService {
     customerId: number;
     cafeId: number;
     items: Array<{ menuItemId: number; quantity: number }>;
+    orderType?: OrderType;
     deliveryAddress?: string;
     customerPhone?: string;
     customerName?: string;
@@ -240,11 +241,14 @@ export interface OrderItem {
   description?: string;
 }
 
+export type OrderType = 'DINE_IN' | 'TAKE_AWAY' | 'DELIVERY';
+
 export interface Order {
   id: number;
   customerId: number;
   cafeId: number;
   status: 'pending' | 'preparing' | 'ready' | 'on_the_way' | 'delivered' | 'cancelled';
+  orderType: OrderType;
   total: number;
   deliveryAddress?: string;
   customerPhone?: string;

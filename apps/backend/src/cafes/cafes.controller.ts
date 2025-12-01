@@ -11,10 +11,17 @@ export class CafesController {
   @ApiQuery({ name: 'lat', required: false, type: Number })
   @ApiQuery({ name: 'lon', required: false, type: Number })
   async list(@Query('lat') lat?: string, @Query('lon') lon?: string) {
+    let cafes;
     if (lat && lon) {
-      return this.cafesService.findNearest(Number(lat), Number(lon));
+      cafes = await this.cafesService.findNearest(Number(lat), Number(lon));
+    } else {
+      cafes = await this.cafesService.listSortedByRating();
     }
-    return this.cafesService.listSortedByRating();
+    // Add isOpen status to each cafe
+    return cafes.map(cafe => ({
+      ...cafe,
+      isOpen: this.cafesService.isCafeOpen(cafe.businessHours as any),
+    }));
   }
 
   @Get(':id')

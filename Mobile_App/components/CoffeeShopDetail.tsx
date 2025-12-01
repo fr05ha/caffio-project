@@ -61,6 +61,7 @@ export default function CoffeeShopDetail({
   const [activeTab, setActiveTab] = useState<'menu' | 'reviews' | 'info'>('menu');
   const [showOrderDialog, setShowOrderDialog] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [orderType, setOrderType] = useState<'DINE_IN' | 'TAKE_AWAY' | 'DELIVERY'>('DELIVERY');
 
   const formatBusinessHours = (hours: BusinessHours | undefined): string => {
     if (!hours || typeof hours !== 'object') {
@@ -169,9 +170,16 @@ export default function CoffeeShopDetail({
   const handlePlaceOrder = async () => {
     if (!cartCount || !customerId || !cafe) return;
 
-    // Show dialog to enter delivery address
-    if (!deliveryAddress.trim()) {
-      setShowOrderDialog(true);
+    // Show dialog to select order type and enter delivery address if needed
+    setShowOrderDialog(true);
+  };
+
+  const handleConfirmOrder = async () => {
+    if (!cartCount || !customerId || !cafe) return;
+
+    // Validate delivery address for delivery orders
+    if (orderType === 'DELIVERY' && !deliveryAddress.trim()) {
+      Alert.alert('Error', 'Please enter a delivery address for delivery orders.');
       return;
     }
 
@@ -185,9 +193,10 @@ export default function CoffeeShopDetail({
         customerId,
         cafeId: cafe.id,
         items,
+        orderType,
         customerName,
         customerPhone,
-        deliveryAddress: deliveryAddress.trim(),
+        deliveryAddress: orderType === 'DELIVERY' ? deliveryAddress.trim() : undefined,
         notes: `Order from ${cafe.name}`,
       });
 
@@ -200,6 +209,7 @@ export default function CoffeeShopDetail({
             onPress: () => {
               setCart({});
               setDeliveryAddress('');
+              setOrderType('DELIVERY'); // Reset to default
               setShowOrderDialog(false);
               if (onOrderPlaced) {
                 onOrderPlaced(order);
@@ -407,14 +417,12 @@ export default function CoffeeShopDetail({
           )}
 
           {/* Open/Closed Status */}
-          {cafe.isOpen !== undefined && (
-            <View style={styles.statusRow}>
-              <View style={[styles.statusDot, { backgroundColor: cafe.isOpen ? '#4CAF50' : '#F44336' }]} />
-              <Text style={[styles.statusText, { color: cafe.isOpen ? '#4CAF50' : '#F44336' }]}>
-                {cafe.isOpen ? 'Open now' : 'Closed'}
-              </Text>
-            </View>
-          )}
+          <View style={styles.statusRow}>
+            <View style={[styles.statusDot, { backgroundColor: cafe.isOpen ? '#4CAF50' : '#F44336' }]} />
+            <Text style={[styles.statusText, { color: cafe.isOpen ? '#4CAF50' : '#F44336' }]}>
+              {cafe.isOpen ? 'Open now' : 'Closed'}
+            </Text>
+          </View>
 
           {cafe.description && (
             <Text style={styles.descriptionText}>{cafe.description}</Text>
@@ -567,17 +575,56 @@ export default function CoffeeShopDetail({
           {showOrderDialog && (
             <View style={styles.dialogOverlay}>
               <View style={styles.dialog}>
-                <Text style={styles.dialogTitle}>Delivery Address</Text>
-                <Text style={styles.dialogSubtitle}>Please enter your delivery address</Text>
-                <TextInput
-                  style={styles.addressInput}
-                  placeholder="Enter your address"
-                  placeholderTextColor="#8D6E63"
-                  value={deliveryAddress}
-                  onChangeText={setDeliveryAddress}
-                  multiline
-                  numberOfLines={3}
-                />
+                <Text style={styles.dialogTitle}>Order Details</Text>
+                <Text style={styles.dialogSubtitle}>Select order type</Text>
+                
+                {/* Order Type Selection */}
+                <View style={styles.orderTypeContainer}>
+                  <TouchableOpacity
+                    style={[styles.orderTypeButton, orderType === 'DINE_IN' && styles.orderTypeButtonActive]}
+                    onPress={() => setOrderType('DINE_IN')}
+                  >
+                    <Ionicons name="restaurant" size={20} color={orderType === 'DINE_IN' ? '#FFFFFF' : '#5D4037'} />
+                    <Text style={[styles.orderTypeText, orderType === 'DINE_IN' && styles.orderTypeTextActive]}>
+                      Dine In
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.orderTypeButton, orderType === 'TAKE_AWAY' && styles.orderTypeButtonActive]}
+                    onPress={() => setOrderType('TAKE_AWAY')}
+                  >
+                    <Ionicons name="bag" size={20} color={orderType === 'TAKE_AWAY' ? '#FFFFFF' : '#5D4037'} />
+                    <Text style={[styles.orderTypeText, orderType === 'TAKE_AWAY' && styles.orderTypeTextActive]}>
+                      Take Away
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.orderTypeButton, orderType === 'DELIVERY' && styles.orderTypeButtonActive]}
+                    onPress={() => setOrderType('DELIVERY')}
+                  >
+                    <Ionicons name="car" size={20} color={orderType === 'DELIVERY' ? '#FFFFFF' : '#5D4037'} />
+                    <Text style={[styles.orderTypeText, orderType === 'DELIVERY' && styles.orderTypeTextActive]}>
+                      Delivery
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Delivery Address Input (only for DELIVERY) */}
+                {orderType === 'DELIVERY' && (
+                  <>
+                    <Text style={styles.dialogSubtitle}>Please enter your delivery address</Text>
+                    <TextInput
+                      style={styles.addressInput}
+                      placeholder="Enter your address"
+                      placeholderTextColor="#8D6E63"
+                      value={deliveryAddress}
+                      onChangeText={setDeliveryAddress}
+                      multiline
+                      numberOfLines={3}
+                    />
+                  </>
+                )}
+
                 <View style={styles.dialogButtons}>
                   <TouchableOpacity
                     style={[styles.dialogButton, styles.dialogButtonCancel]}
@@ -587,10 +634,10 @@ export default function CoffeeShopDetail({
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.dialogButton, styles.dialogButtonConfirm]}
-                    onPress={handlePlaceOrder}
-                    disabled={!deliveryAddress.trim()}
+                    onPress={handleConfirmOrder}
+                    disabled={orderType === 'DELIVERY' && !deliveryAddress.trim()}
                   >
-                    <Text style={[styles.dialogButtonText, !deliveryAddress.trim() && styles.dialogButtonTextDisabled]}>
+                    <Text style={[styles.dialogButtonText, (orderType === 'DELIVERY' && !deliveryAddress.trim()) && styles.dialogButtonTextDisabled]}>
                       Place Order
                     </Text>
                   </TouchableOpacity>
@@ -1108,6 +1155,36 @@ const styles = StyleSheet.create({
   },
   dialogButtonTextDisabled: {
     opacity: 0.5,
+  },
+  orderTypeContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  orderTypeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    backgroundColor: '#FFFFFF',
+    gap: 6,
+  },
+  orderTypeButtonActive: {
+    backgroundColor: '#5D4037',
+    borderColor: '#5D4037',
+  },
+  orderTypeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#5D4037',
+  },
+  orderTypeTextActive: {
+    color: '#FFFFFF',
   },
 });
 

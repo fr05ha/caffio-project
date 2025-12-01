@@ -259,6 +259,17 @@ export default function OrdersView({ customerId, onBack }: OrdersViewProps) {
                 </View>
               )}
 
+              <View style={styles.orderTypeRow}>
+                <Ionicons 
+                  name={order.orderType === 'DINE_IN' ? 'restaurant' : order.orderType === 'TAKE_AWAY' ? 'bag' : 'car'} 
+                  size={16} 
+                  color="#8D6E63" 
+                />
+                <Text style={styles.orderTypeText}>
+                  {order.orderType === 'DINE_IN' ? 'Dine In' : order.orderType === 'TAKE_AWAY' ? 'Take Away' : 'Delivery'}
+                </Text>
+              </View>
+
               <View style={styles.itemsSection}>
                 <Text style={styles.itemsTitle}>Items ({order.items.length})</Text>
                 {order.items.map((item, index) => (
@@ -395,6 +406,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#5D4037',
+  },
+  orderTypeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  orderTypeText: {
+    fontSize: 14,
+    color: '#8D6E63',
+    fontWeight: '500',
   },
   itemsSection: {
     marginBottom: 12,

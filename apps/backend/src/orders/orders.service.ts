@@ -9,6 +9,7 @@ export class OrdersService {
     customerId: number;
     cafeId: number;
     items: Array<{ menuItemId: number; quantity: number }>;
+    orderType?: 'DINE_IN' | 'TAKE_AWAY' | 'DELIVERY';
     deliveryAddress?: string;
     customerPhone?: string;
     customerName?: string;
@@ -45,6 +46,7 @@ export class OrdersService {
           customerId: data.customerId,
           cafeId: data.cafeId,
           total,
+          orderType: data.orderType || 'DELIVERY',
           deliveryAddress: data.deliveryAddress,
           customerPhone: data.customerPhone,
           customerName: data.customerName,

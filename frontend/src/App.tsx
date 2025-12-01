@@ -77,6 +77,7 @@ export default function App() {
         const mappedOrders: Order[] = ordersData.map((order) => ({
           id: String(order.id),
           shopId: String(order.cafeId),
+          orderType: order.orderType,
           shopName: order.cafe?.name || 'Unknown Cafe',
           customerName: order.customerName || order.customer?.name || 'Unknown Customer',
           customerPhone: order.customerPhone || '',

@@ -82,11 +82,14 @@ export type OrderItemDto = {
   description?: string | null;
 };
 
+export type OrderType = 'DINE_IN' | 'TAKE_AWAY' | 'DELIVERY';
+
 export type OrderDto = {
   id: number;
   customerId: number;
   cafeId: number;
   status: 'pending' | 'preparing' | 'ready' | 'on_the_way' | 'delivered' | 'cancelled';
+  orderType: OrderType;
   total: number;
   deliveryAddress?: string | null;
   customerPhone?: string | null;
