@@ -17,6 +17,7 @@ import { apiService, Cafe, Menu, MenuItem, BusinessHours, Order } from '../servi
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { baseTheme } from '../theme';
+import MenuItemDetail from './MenuItemDetail';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -89,7 +90,8 @@ export default function CoffeeShopDetail({
     return formatted.length > 0 ? formatted.join('\n') : 'Closed';
   };
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [cart, setCart] = useState<Record<number, { item: MenuItem; quantity: number }>>({});
+  const [cart, setCart] = useState<Record<number, { item: MenuItem; quantity: number; customizations?: Record<string, string>; totalPrice: number }>>({});
+  const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
 
   useEffect(() => {
     loadCafeDetails();
@@ -130,7 +132,7 @@ export default function CoffeeShopDetail({
   const cartEntries = useMemo(() => Object.values(cart), [cart]);
   const cartCount = useMemo(() => cartEntries.reduce((sum, entry) => sum + entry.quantity, 0), [cartEntries]);
   const cartTotal = useMemo(
-    () => cartEntries.reduce((sum, entry) => sum + entry.item.price * entry.quantity, 0),
+    () => cartEntries.reduce((sum, entry) => sum + (entry.totalPrice || entry.item.price) * entry.quantity, 0),
     [cartEntries],
   );
 
@@ -138,18 +140,28 @@ export default function CoffeeShopDetail({
     return `$${price.toFixed(2)} ${currency}`;
   };
 
-  const handleAddToCart = (item: MenuItem) => {
+  const handleAddToCart = (item: MenuItem, customizations?: Record<string, string>, totalPrice?: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setCart((prev) => {
       const existing = prev[item.id];
+      const finalPrice = totalPrice || item.price;
+      const finalQuantity = existing ? existing.quantity + 1 : 1;
       return {
         ...prev,
         [item.id]: {
           item,
-          quantity: existing ? existing.quantity + 1 : 1,
+          quantity: finalQuantity,
+          customizations: customizations || existing?.customizations,
+          totalPrice: finalPrice,
         },
       };
     });
+    setSelectedMenuItem(null);
+  };
+
+  const handleMenuItemPress = (item: MenuItem) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedMenuItem(item);
   };
 
   const handleRemoveFromCart = (itemId: number) => {
@@ -229,7 +241,12 @@ export default function CoffeeShopDetail({
     const cartEntry = cart[item.id];
 
     return (
-      <View key={item.id} style={styles.menuItem}>
+      <TouchableOpacity
+        key={item.id}
+        style={styles.menuItem}
+        onPress={() => handleMenuItemPress(item)}
+        activeOpacity={0.7}
+      >
         <View style={styles.menuItemContent}>
           <View style={styles.menuItemImageContainer}>
             <Image
@@ -246,7 +263,10 @@ export default function CoffeeShopDetail({
               <Text style={styles.menuItemName}>{item.name}</Text>
               {onToggleMenuItemFavorite && (
                 <TouchableOpacity
-                  onPress={() => onToggleMenuItemFavorite(item.id)}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    onToggleMenuItemFavorite(item.id);
+                  }}
                   style={styles.menuItemFavoriteButton}
                 >
                   <Ionicons
@@ -263,26 +283,44 @@ export default function CoffeeShopDetail({
               </Text>
             )}
             <View style={styles.menuItemFooter}>
-              <Text style={styles.menuItemPrice}>{formatPrice(item.price, item.currency)}</Text>
+              <Text style={styles.menuItemPrice}>
+                {cartEntry?.totalPrice ? formatPrice(cartEntry.totalPrice, item.currency) : formatPrice(item.price, item.currency)}
+              </Text>
               {cartEntry ? (
                 <View style={styles.quantityStepper}>
-                  <TouchableOpacity onPress={() => handleRemoveFromCart(item.id)}>
+                  <TouchableOpacity
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleRemoveFromCart(item.id);
+                    }}
+                  >
                     <Ionicons name="remove" size={18} color="#5D4037" />
                   </TouchableOpacity>
                   <Text style={styles.quantityText}>{cartEntry.quantity}</Text>
-                  <TouchableOpacity onPress={() => handleAddToCart(item)}>
+                  <TouchableOpacity
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(item, cartEntry.customizations, cartEntry.totalPrice);
+                    }}
+                  >
                     <Ionicons name="add" size={18} color="#5D4037" />
                   </TouchableOpacity>
                 </View>
               ) : (
-                <TouchableOpacity style={styles.addButton} onPress={() => handleAddToCart(item)}>
+                <TouchableOpacity
+                  style={styles.addButton}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleMenuItemPress(item);
+                  }}
+                >
                   <Text style={styles.addButtonText}>Add</Text>
                 </TouchableOpacity>
               )}
             </View>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -560,6 +598,19 @@ export default function CoffeeShopDetail({
           </View>
         )}
       </ScrollView>
+      
+      {/* Menu Item Detail Modal */}
+      {selectedMenuItem && cafe && (
+        <MenuItemDetail
+          item={selectedMenuItem}
+          cafeName={cafe.name}
+          onBack={() => setSelectedMenuItem(null)}
+          onAddToCart={handleAddToCart}
+          isFavorite={favoriteMenuItemIds.includes(selectedMenuItem.id)}
+          onToggleFavorite={() => onToggleMenuItemFavorite?.(selectedMenuItem.id)}
+        />
+      )}
+
       {cartCount > 0 && (
         <>
           <View style={styles.orderBar}>
