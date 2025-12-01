@@ -456,10 +456,23 @@ export default function CoffeeShopDetail({
 
           {/* Open/Closed Status */}
           <View style={styles.statusRow}>
-            <View style={[styles.statusDot, { backgroundColor: (cafe.isOpen === true) ? '#4CAF50' : '#F44336' }]} />
-            <Text style={[styles.statusText, { color: (cafe.isOpen === true) ? '#4CAF50' : '#F44336' }]}>
-              {(cafe.isOpen === true) ? 'Open now' : 'Closed'}
-            </Text>
+            {(() => {
+              const isOpen = cafe.isOpen === true;
+              return (
+                <>
+                  <View style={[styles.statusDot, { backgroundColor: isOpen ? '#4CAF50' : '#F44336' }]} />
+                  <Ionicons 
+                    name={isOpen ? 'time' : 'time-outline'} 
+                    size={16} 
+                    color={isOpen ? '#4CAF50' : '#F44336'} 
+                    style={styles.statusIcon}
+                  />
+                  <Text style={[styles.statusText, { color: isOpen ? '#4CAF50' : '#F44336' }]}>
+                    {isOpen ? 'Open now' : 'Closed'}
+                  </Text>
+                </>
+              );
+            })()}
           </View>
 
           {cafe.description && (
@@ -860,16 +873,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     borderRadius: 8,
     alignSelf: 'flex-start',
+    gap: 6,
   },
   statusDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginRight: 8,
+  },
+  statusIcon: {
+    marginLeft: 2,
   },
   statusText: {
     fontSize: 14,
     fontWeight: '600',
+    marginLeft: 4,
   },
   descriptionText: {
     fontSize: 14,

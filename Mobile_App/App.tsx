@@ -103,8 +103,9 @@ export default function App() {
 
       const transformedShops: CoffeeShop[] = cafes.map((cafe, index) => {
         // Use isOpen directly from API - backend calculates it based on business hours
-        // Explicitly convert to boolean to ensure proper type
-        const isOpenValue = cafe.isOpen === true;
+        // Handle undefined/null cases - default to true if not set (as per backend logic)
+        // Explicitly check for boolean true to ensure proper evaluation
+        const isOpenValue = typeof cafe.isOpen === 'boolean' ? cafe.isOpen : (cafe.isOpen === true || cafe.isOpen === undefined);
         return {
           id: cafe.id,
           name: cafe.name,
@@ -235,8 +236,23 @@ export default function App() {
           />
           <View style={styles.cardHeader}>
             <View style={styles.statusContainer}>
-              <View style={[styles.statusDot, { backgroundColor: (item.isOpen === true) ? '#4CAF50' : '#F44336' }]} />
-              <Text style={styles.statusText}>{(item.isOpen === true) ? 'Open now' : 'Closed'}</Text>
+              {(() => {
+                const isOpen = item.isOpen === true;
+                return (
+                  <>
+                    <View style={[styles.statusDot, { backgroundColor: isOpen ? '#4CAF50' : '#F44336' }]} />
+                    <Ionicons 
+                      name={isOpen ? 'time' : 'time-outline'} 
+                      size={14} 
+                      color={isOpen ? '#4CAF50' : '#F44336'} 
+                      style={styles.statusIcon}
+                    />
+                    <Text style={[styles.statusText, { color: isOpen ? '#4CAF50' : '#F44336' }]}>
+                      {isOpen ? 'Open now' : 'Closed'}
+                    </Text>
+                  </>
+                );
+              })()}
               {item.isCertified && (
                 <View style={styles.certifiedBadge}>
                   <Ionicons name="checkmark-circle" size={12} color="#4CAF50" />
@@ -643,17 +659,20 @@ const styles = StyleSheet.create({
   statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 4,
   },
   statusDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginRight: 6,
+  },
+  statusIcon: {
+    marginLeft: 2,
   },
   statusText: {
     fontSize: 12,
     fontWeight: '600',
-    color: baseTheme.palette.textSecondary,
+    marginLeft: 4,
   },
   certifiedBadge: {
     flexDirection: 'row',

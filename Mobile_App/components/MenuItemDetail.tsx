@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Platform,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { MenuItem } from '../services/api';
@@ -21,6 +22,7 @@ interface CustomizationOption {
   id: string;
   name: string;
   price?: number;
+  icon?: string;
 }
 
 interface CustomizationGroup {
@@ -40,35 +42,35 @@ interface MenuItemDetailProps {
   onToggleFavorite?: () => void;
 }
 
-// Default customization options
-const MILK_OPTIONS: CustomizationOption[] = [
-  { id: 'whole', name: 'Whole Milk', price: 0 },
-  { id: 'skim', name: 'Skim Milk', price: 0 },
-  { id: 'oat', name: 'Oat Milk', price: 0.5 },
-  { id: 'almond', name: 'Almond Milk', price: 0.5 },
-  { id: 'soy', name: 'Soy Milk', price: 0.5 },
-  { id: 'coconut', name: 'Coconut Milk', price: 0.5 },
-  { id: 'none', name: 'No Milk', price: 0 },
+// Default customization options with icons
+const MILK_OPTIONS: (CustomizationOption & { icon: string })[] = [
+  { id: 'whole', name: 'Whole Milk', price: 0, icon: 'water' },
+  { id: 'skim', name: 'Skim Milk', price: 0, icon: 'water-outline' },
+  { id: 'oat', name: 'Oat Milk', price: 0.5, icon: 'leaf' },
+  { id: 'almond', name: 'Almond Milk', price: 0.5, icon: 'nutrition' },
+  { id: 'soy', name: 'Soy Milk', price: 0.5, icon: 'flower' },
+  { id: 'coconut', name: 'Coconut Milk', price: 0.5, icon: 'tropical' },
+  { id: 'none', name: 'No Milk', price: 0, icon: 'close-circle' },
 ];
 
-const SIZE_OPTIONS: CustomizationOption[] = [
-  { id: 'small', name: 'Small', price: 0 },
-  { id: 'medium', name: 'Medium', price: 1.0 },
-  { id: 'large', name: 'Large', price: 2.0 },
+const SIZE_OPTIONS: (CustomizationOption & { icon: string })[] = [
+  { id: 'small', name: 'Small', price: 0, icon: 'remove-circle-outline' },
+  { id: 'medium', name: 'Medium', price: 1.0, icon: 'radio-button-on' },
+  { id: 'large', name: 'Large', price: 2.0, icon: 'add-circle-outline' },
 ];
 
-const SUGAR_OPTIONS: CustomizationOption[] = [
-  { id: 'none', name: 'No Sugar', price: 0 },
-  { id: 'half', name: 'Half Sugar', price: 0 },
-  { id: 'normal', name: 'Normal Sugar', price: 0 },
-  { id: 'extra', name: 'Extra Sugar', price: 0 },
+const SUGAR_OPTIONS: (CustomizationOption & { icon: string })[] = [
+  { id: 'none', name: 'No Sugar', price: 0, icon: 'close-circle-outline' },
+  { id: 'half', name: 'Half Sugar', price: 0, icon: 'remove-circle-outline' },
+  { id: 'normal', name: 'Normal Sugar', price: 0, icon: 'radio-button-on' },
+  { id: 'extra', name: 'Extra Sugar', price: 0, icon: 'add-circle-outline' },
 ];
 
-const ICE_OPTIONS: CustomizationOption[] = [
-  { id: 'none', name: 'No Ice', price: 0 },
-  { id: 'light', name: 'Light Ice', price: 0 },
-  { id: 'normal', name: 'Normal Ice', price: 0 },
-  { id: 'extra', name: 'Extra Ice', price: 0 },
+const ICE_OPTIONS: (CustomizationOption & { icon: string })[] = [
+  { id: 'none', name: 'No Ice', price: 0, icon: 'close-circle-outline' },
+  { id: 'light', name: 'Light Ice', price: 0, icon: 'snow-outline' },
+  { id: 'normal', name: 'Normal Ice', price: 0, icon: 'snow' },
+  { id: 'extra', name: 'Extra Ice', price: 0, icon: 'snow' },
 ];
 
 export default function MenuItemDetail({
@@ -89,7 +91,7 @@ export default function MenuItemDetail({
                    item.name.toLowerCase().includes('americano') ||
                    item.name.toLowerCase().includes('mocha');
 
-  const [customizations, setCustomizations] = useState<Record<string, string>>({
+  const [customizations, setCustomizations] = useState<Record<string, string | undefined>>({
     size: 'medium',
     milk: isCoffee ? 'whole' : undefined,
     sugar: isCoffee ? 'normal' : undefined,
@@ -161,13 +163,20 @@ export default function MenuItemDetail({
   const handleAddToCart = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     const totalPrice = calculateTotalPrice();
-    onAddToCart(item, customizations, totalPrice);
+    // Filter out undefined values before passing to onAddToCart
+    const filteredCustomizations: Record<string, string> = {};
+    Object.entries(customizations).forEach(([key, value]) => {
+      if (value !== undefined) {
+        filteredCustomizations[key] = value;
+      }
+    });
+    onAddToCart(item, filteredCustomizations, totalPrice);
   };
 
   const totalPrice = calculateTotalPrice();
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Hero Image */}
         <View style={styles.imageContainer}>
@@ -212,14 +221,34 @@ export default function MenuItemDetail({
 
         {/* Customization Section */}
         <View style={styles.customizationSection}>
-          {customizationGroups.map((group) => (
-            <View key={group.id} style={styles.customizationGroup}>
-              <View style={styles.groupHeader}>
-                <Text style={styles.groupTitle}>{group.title}</Text>
-                {group.required && (
-                  <Text style={styles.requiredLabel}>Required</Text>
-                )}
-              </View>
+          {customizationGroups.map((group) => {
+            // Get icon for customization group
+            const getGroupIcon = (groupId: string) => {
+              switch (groupId) {
+                case 'size':
+                  return 'resize-outline';
+                case 'milk':
+                  return 'water-outline';
+                case 'sugar':
+                  return 'cube-outline';
+                case 'ice':
+                  return 'snow-outline';
+                default:
+                  return 'options-outline';
+              }
+            };
+
+            return (
+              <View key={group.id} style={styles.customizationGroup}>
+                <View style={styles.groupHeader}>
+                  <View style={styles.groupTitleContainer}>
+                    <Ionicons name={getGroupIcon(group.id) as any} size={20} color={baseTheme.palette.brandBrown} style={styles.groupIcon} />
+                    <Text style={styles.groupTitle}>{group.title}</Text>
+                  </View>
+                  {group.required && (
+                    <Text style={styles.requiredLabel}>Required</Text>
+                  )}
+                </View>
               <View style={styles.optionsContainer}>
                 {group.options.map((option) => {
                   const isSelected = group.selected === option.id;
@@ -231,7 +260,16 @@ export default function MenuItemDetail({
                         isSelected && styles.optionButtonSelected,
                       ]}
                       onPress={() => handleCustomizationChange(group.id, option.id)}
+                      activeOpacity={0.7}
                     >
+                      {option.icon && (
+                        <Ionicons
+                          name={option.icon as any}
+                          size={18}
+                          color={isSelected ? baseTheme.palette.brandBrown : '#8D6E63'}
+                          style={styles.optionIcon}
+                        />
+                      )}
                       <Text
                         style={[
                           styles.optionText,
@@ -258,7 +296,8 @@ export default function MenuItemDetail({
                 })}
               </View>
             </View>
-          ))}
+            );
+          })}
         </View>
 
         {/* Quantity Selector */}
@@ -290,7 +329,7 @@ export default function MenuItemDetail({
         </View>
         <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
           <LinearGradient
-            colors={[baseTheme.palette.brandBrown, baseTheme.palette.brandBrownDark]}
+            colors={[baseTheme.palette.brandBrown, baseTheme.palette.brandDark]}
             style={styles.addButtonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -299,7 +338,7 @@ export default function MenuItemDetail({
           </LinearGradient>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -319,7 +358,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: screenWidth,
-    height: screenHeight * 0.4,
+    height: Math.min(screenHeight * 0.4, 350),
     position: 'relative',
   },
   heroImage: {
@@ -335,7 +374,7 @@ const styles = StyleSheet.create({
   },
   header: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 20,
+    top: Platform.OS === 'ios' ? 44 : 20,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -404,6 +443,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
+  groupTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  groupIcon: {
+    marginRight: 8,
+  },
   groupTitle: {
     fontSize: 20,
     fontWeight: '700',
@@ -417,10 +463,9 @@ const styles = StyleSheet.create({
   optionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
   },
   optionButton: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 25,
     backgroundColor: '#F5F5F5',
@@ -429,7 +474,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    minWidth: 100,
+    marginRight: 8,
+    minWidth: Platform.OS === 'ios' ? 100 : 90,
+    maxWidth: screenWidth * 0.45,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  optionIcon: {
+    marginRight: 8,
   },
   optionButtonSelected: {
     backgroundColor: '#FFF3E0',
