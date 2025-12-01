@@ -20,8 +20,6 @@ interface AuthScreenProps {
   onSignup: (name: string, email: string, password: string) => Promise<void>;
 }
 
-const featureHighlights = ['Save favorite drinks', 'Track loyalty perks', 'Exclusive cafe drops'];
-
 export default function AuthScreen({ loading, onLogin, onSignup }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>('login');
   const [name, setName] = useState('');
@@ -55,31 +53,24 @@ export default function AuthScreen({ loading, onLogin, onSignup }: AuthScreenPro
   };
 
   return (
-    <LinearGradient colors={[baseTheme.palette.peach, baseTheme.palette.lilac]} style={styles.gradient}>
+    <LinearGradient 
+      colors={['#5D4037', '#6D4C41', '#8D6E63']} 
+      style={styles.gradient}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       <View style={styles.container}>
         <View style={styles.heroSection}>
-          <View style={styles.logoBadge}>
-            <Image source={require('../../assets/caffio-logo.png')} style={styles.logo} resizeMode="contain" />
-          </View>
-          <Text style={styles.brandLine}>Brewed for explorers</Text>
-          <Text style={styles.heroTitle}>Sip the city smarter</Text>
-          <Text style={styles.heroSubtitle}>Discover independent cafes, favorite drinks, and perks—all in one pour.</Text>
-          <View style={styles.featurePills}>
-            {featureHighlights.map((feature) => (
-              <View key={feature} style={styles.pill}>
-                <Text style={styles.pillText}>{feature}</Text>
-              </View>
-            ))}
-          </View>
+          <Image 
+            source={require('../../assets/caffio-logo.png')} 
+            style={styles.logo} 
+            resizeMode="contain" 
+          />
+          <Text style={styles.brandName}>Caffio</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.title}>{mode === 'login' ? 'Welcome back' : 'Create your account'}</Text>
-          <Text style={styles.subtitle}>
-            {mode === 'login'
-              ? 'Sign in to pick up where you left off.'
-              : 'Sign up to unlock curated cafe drops & rewards.'}
-          </Text>
+          <Text style={styles.title}>{mode === 'login' ? 'Welcome' : 'Join Us'}</Text>
 
           {mode === 'signup' && (
             <View style={styles.inputGroup}>
@@ -132,7 +123,7 @@ export default function AuthScreen({ loading, onLogin, onSignup }: AuthScreenPro
 
           <TouchableOpacity onPress={toggleMode} style={styles.toggleButton}>
             <Text style={styles.toggleText}>
-              {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+              {mode === 'login' ? "New here? " : 'Have an account? '}
               <Text style={styles.toggleTextBold}>{mode === 'login' ? 'Sign up' : 'Sign in'}</Text>
             </Text>
           </TouchableOpacity>
@@ -150,124 +141,87 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingTop: Platform.select({ ios: 70, android: 40 }),
+    paddingHorizontal: 32,
+    paddingTop: Platform.select({ ios: 60, android: 40 }),
     paddingBottom: 40,
   },
   heroSection: {
     alignItems: 'center',
-    marginBottom: 28,
-  },
-  logoBadge: {
-    width: 72,
-    height: 72,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 48,
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 120,
+    height: 120,
+    marginBottom: 16,
   },
-  brandLine: {
-    fontSize: 14,
+  brandName: {
+    fontSize: 36,
+    fontWeight: '700',
+    color: '#FFFFFF',
     letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.8)',
-    marginBottom: 8,
-  },
-  heroTitle: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    textAlign: 'center',
-  },
-  heroSubtitle: {
-    textAlign: 'center',
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: 16,
-    marginTop: 8,
-    maxWidth: 320,
-  },
-  featurePills: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginTop: 18,
-    gap: 8,
-  },
-  pill: {
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 999,
-  },
-  pillText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: 13,
   },
   card: {
     width: '100%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 28,
-    padding: 26,
+    borderRadius: 24,
+    padding: 32,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 30,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 12,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#2E1E15',
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#5D4037',
     textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6D4C41',
-    textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 32,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#6D4C41',
-    marginBottom: 6,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderWidth: 2,
+    borderColor: '#E8E8E8',
     borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 16,
-    color: '#4E342E',
+    color: '#3E2723',
+    backgroundColor: '#FAFAFA',
   },
   button: {
-    backgroundColor: baseTheme.palette.brandBrown,
-    paddingVertical: 14,
-    borderRadius: 16,
+    backgroundColor: '#5D4037',
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
     marginTop: 8,
+    shadowColor: '#5D4037',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
+    letterSpacing: 0.5,
   },
   toggleButton: {
-    marginTop: 16,
+    marginTop: 24,
     alignItems: 'center',
   },
   toggleText: {

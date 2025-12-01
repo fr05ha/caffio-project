@@ -262,35 +262,39 @@ export default function MenuItemDetail({
                       onPress={() => handleCustomizationChange(group.id, option.id)}
                       activeOpacity={0.7}
                     >
-                      {option.icon && (
-                        <Ionicons
-                          name={option.icon as any}
-                          size={18}
-                          color={isSelected ? baseTheme.palette.brandBrown : '#8D6E63'}
-                          style={styles.optionIcon}
-                        />
-                      )}
-                      <Text
-                        style={[
-                          styles.optionText,
-                          isSelected && styles.optionTextSelected,
-                        ]}
-                      >
-                        {option.name}
-                      </Text>
-                      {option.price !== undefined && option.price > 0 && (
-                        <Text
-                          style={[
-                            styles.optionPrice,
-                            isSelected && styles.optionPriceSelected,
-                          ]}
-                        >
-                          +${option.price.toFixed(2)}
-                        </Text>
-                      )}
-                      {isSelected && (
-                        <Ionicons name="checkmark-circle" size={20} color={baseTheme.palette.brandBrown} style={styles.checkIcon} />
-                      )}
+                      <View style={styles.optionContent}>
+                        {option.icon && (
+                          <Ionicons
+                            name={option.icon as any}
+                            size={20}
+                            color={isSelected ? baseTheme.palette.brandBrown : '#8D6E63'}
+                            style={styles.optionIcon}
+                          />
+                        )}
+                        <View style={styles.optionTextContainer}>
+                          <Text
+                            style={[
+                              styles.optionText,
+                              isSelected && styles.optionTextSelected,
+                            ]}
+                          >
+                            {option.name}
+                          </Text>
+                          {option.price !== undefined && option.price > 0 && (
+                            <Text
+                              style={[
+                                styles.optionPrice,
+                                isSelected && styles.optionPriceSelected,
+                              ]}
+                            >
+                              +${option.price.toFixed(2)}
+                            </Text>
+                          )}
+                        </View>
+                        {isSelected && (
+                          <Ionicons name="checkmark-circle" size={22} color={baseTheme.palette.brandBrown} style={styles.checkIcon} />
+                        )}
+                      </View>
                     </TouchableOpacity>
                   );
                 })}
@@ -435,13 +439,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   customizationGroup: {
-    marginBottom: 32,
+    marginBottom: 40,
   },
   groupHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
   groupTitleContainer: {
     flexDirection: 'row',
@@ -463,85 +470,106 @@ const styles = StyleSheet.create({
   optionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: 12,
   },
   optionButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 25,
-    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 16,
+    backgroundColor: '#FAFAFA',
     borderWidth: 2,
-    borderColor: 'transparent',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    marginRight: 8,
-    minWidth: Platform.OS === 'ios' ? 100 : 90,
+    borderColor: '#E0E0E0',
+    minWidth: screenWidth * 0.42,
     maxWidth: screenWidth * 0.45,
+    marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  optionIcon: {
-    marginRight: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
   },
   optionButtonSelected: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: '#FFF8F0',
     borderColor: baseTheme.palette.brandBrown,
+    borderWidth: 2.5,
+    shadowColor: baseTheme.palette.brandBrown,
+    shadowOpacity: 0.15,
+  },
+  optionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  optionIcon: {
+    marginRight: 12,
+  },
+  optionTextContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   optionText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: '#5D4037',
-    flex: 1,
+    marginBottom: 4,
   },
   optionTextSelected: {
     color: baseTheme.palette.brandBrown,
+    fontWeight: '700',
   },
   optionPrice: {
     fontSize: 13,
     color: '#8D6E63',
-    marginLeft: 8,
+    fontWeight: '500',
   },
   optionPriceSelected: {
     color: baseTheme.palette.brandBrown,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   checkIcon: {
     marginLeft: 8,
   },
   quantitySection: {
-    padding: 20,
-    backgroundColor: '#FFFFFF',
+    padding: 24,
+    backgroundColor: '#FAFAFA',
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
+    marginTop: 8,
   },
   quantityLabel: {
     fontSize: 20,
     fontWeight: '700',
     color: '#2C2C2C',
-    marginBottom: 16,
+    marginBottom: 20,
+    textAlign: 'center',
   },
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 24,
   },
   quantityButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F5F5F5',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: baseTheme.palette.brandBrown,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   quantityValue: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
     color: '#2C2C2C',
-    marginHorizontal: 24,
-    minWidth: 40,
+    minWidth: 50,
     textAlign: 'center',
   },
   bottomBar: {
