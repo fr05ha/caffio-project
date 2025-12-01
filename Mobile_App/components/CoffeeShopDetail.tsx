@@ -100,15 +100,6 @@ export default function CoffeeShopDetail({
       setLoading(true);
       setError(null);
       const cafeData = await apiService.getCafeById(cafeId);
-      // Debug: Log cafe data to check isOpen
-      console.log('Cafe details from API:', {
-        id: cafeData.id,
-        name: cafeData.name,
-        isOpen: cafeData.isOpen,
-        isOpenType: typeof cafeData.isOpen,
-        isOpenBoolean: cafeData.isOpen === true,
-        businessHours: cafeData.businessHours,
-      });
       setCafe(cafeData as CafeDetail);
       setSelectedCategory('All');
       setCart({});

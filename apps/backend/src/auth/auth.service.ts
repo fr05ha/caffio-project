@@ -74,6 +74,17 @@ export class AuthService {
       }
     }
 
+    // Default business hours: 8:00 AM - 8:00 PM, all days enabled
+    const defaultBusinessHours = {
+      monday: { open: '08:00', close: '20:00', enabled: true },
+      tuesday: { open: '08:00', close: '20:00', enabled: true },
+      wednesday: { open: '08:00', close: '20:00', enabled: true },
+      thursday: { open: '08:00', close: '20:00', enabled: true },
+      friday: { open: '08:00', close: '20:00', enabled: true },
+      saturday: { open: '08:00', close: '20:00', enabled: true },
+      sunday: { open: '08:00', close: '20:00', enabled: true },
+    };
+
     // Create cafe and user in a transaction
     const result = await this.db.$transaction(async (tx) => {
       // Create cafe
@@ -86,16 +97,16 @@ export class AuthService {
           primaryColor: data.primaryColor || null,
           secondaryColor: data.secondaryColor || null,
           accentColor: data.accentColor || null,
-          logoUrl: data.logoUrl || null,
-          theme: data.theme || null,
-          phone: data.phone || undefined,
-          email: data.cafeEmail || undefined,
-          description: data.description || undefined,
-          // businessHours will be set in Settings, omit for now
+          logoUrl: data.logoUrl ?? null,
+          theme: data.theme ?? null,
+          ...(data.phone && { phone: data.phone }),
+          ...(data.cafeEmail && { email: data.cafeEmail }),
+          ...(data.description && { description: data.description }),
+          businessHours: defaultBusinessHours as any, // Set default business hours
           ratingAvg: 0,
           ratingCount: 0,
           isCertified: false,
-        },
+        } as any, // Type assertion to handle Prisma JSON types
       });
 
       // Create user linked to cafe

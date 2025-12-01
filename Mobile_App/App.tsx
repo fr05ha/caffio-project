@@ -101,20 +101,10 @@ export default function App() {
         cafes = await apiService.getCafes();
       }
 
-      // Debug: Log cafes to check isOpen
-      console.log('Cafes from API:', cafes.map(cafe => ({
-        id: cafe.id,
-        name: cafe.name,
-        isOpen: cafe.isOpen,
-        isOpenType: typeof cafe.isOpen,
-        businessHours: cafe.businessHours,
-      })));
-
       const transformedShops: CoffeeShop[] = cafes.map((cafe, index) => {
         // Use isOpen directly from API - backend calculates it based on business hours
         // Explicitly convert to boolean to ensure proper type
         const isOpenValue = cafe.isOpen === true;
-        console.log(`Cafe ${cafe.name} (${cafe.id}): isOpen from API = ${cafe.isOpen}, converted to boolean = ${isOpenValue}`);
         return {
           id: cafe.id,
           name: cafe.name,
