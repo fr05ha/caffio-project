@@ -88,25 +88,40 @@ export class CafesService {
   }
 
   isCafeOpen(businessHours: any): boolean {
-    if (!businessHours || typeof businessHours !== 'object') {
-      return false; // Default to closed if no hours set
+    try {
+      if (!businessHours || typeof businessHours !== 'object') {
+        return false; // Default to closed if no hours set
+      }
+
+      // Handle Prisma JSON type - it might be a string that needs parsing
+      let hours = businessHours;
+      if (typeof businessHours === 'string') {
+        try {
+          hours = JSON.parse(businessHours);
+        } catch {
+          return false;
+        }
+      }
+
+      const now = new Date();
+      const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][now.getDay()];
+      const dayHours = hours[dayName];
+
+      if (!dayHours || !dayHours.enabled) {
+        return false;
+      }
+
+      const currentTime = now.getHours() * 60 + now.getMinutes(); // minutes since midnight
+      const [openHour, openMin] = dayHours.open.split(':').map(Number);
+      const [closeHour, closeMin] = dayHours.close.split(':').map(Number);
+      const openTime = openHour * 60 + openMin;
+      const closeTime = closeHour * 60 + closeMin;
+
+      return currentTime >= openTime && currentTime < closeTime;
+    } catch (error) {
+      console.error('Error calculating isCafeOpen:', error);
+      return false; // Default to closed on error
     }
-
-    const now = new Date();
-    const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][now.getDay()];
-    const dayHours = businessHours[dayName];
-
-    if (!dayHours || !dayHours.enabled) {
-      return false;
-    }
-
-    const currentTime = now.getHours() * 60 + now.getMinutes(); // minutes since midnight
-    const [openHour, openMin] = dayHours.open.split(':').map(Number);
-    const [closeHour, closeMin] = dayHours.close.split(':').map(Number);
-    const openTime = openHour * 60 + openMin;
-    const closeTime = closeHour * 60 + closeMin;
-
-    return currentTime >= openTime && currentTime < closeTime;
   }
 }
 

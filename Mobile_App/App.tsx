@@ -101,24 +101,38 @@ export default function App() {
         cafes = await apiService.getCafes();
       }
 
-      const transformedShops: CoffeeShop[] = cafes.map((cafe, index) => ({
-        id: cafe.id,
-        name: cafe.name,
-        address: cafe.address || 'Address not available',
-        rating: cafe.ratingAvg,
-        distance: location
-          ? LocationService.formatDistance(
-              LocationService.calculateDistance(location.latitude, location.longitude, cafe.lat, cafe.lon),
-            )
-          : `${(index + 1) * 200}m`,
-        isOpen: cafe.isOpen ?? false, // Use isOpen from API, default to false if not available
+      // Debug: Log first cafe to check isOpen
+      if (cafes.length > 0) {
+        console.log('First cafe from API:', {
+          id: cafes[0].id,
+          name: cafes[0].name,
+          isOpen: cafes[0].isOpen,
+          businessHours: cafes[0].businessHours,
+        });
+      }
+
+      const transformedShops: CoffeeShop[] = cafes.map((cafe, index) => {
+        // Ensure isOpen is properly handled
+        const isOpenValue = cafe.isOpen !== undefined ? cafe.isOpen : false;
+        return {
+          id: cafe.id,
+          name: cafe.name,
+          address: cafe.address || 'Address not available',
+          rating: cafe.ratingAvg,
+          distance: location
+            ? LocationService.formatDistance(
+                LocationService.calculateDistance(location.latitude, location.longitude, cafe.lat, cafe.lon),
+              )
+            : `${(index + 1) * 200}m`,
+          isOpen: isOpenValue,
         isCertified: cafe.isCertified,
         description: cafe.description || `Rated by ${cafe.ratingCount} customers`,
         priceRange: '$$',
-        image:
-          cafe.imageUrl ||
-          'https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&w=800&q=80',
-      }));
+          image:
+            cafe.imageUrl ||
+            'https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&w=800&q=80',
+        };
+      });
 
       setCoffeeShops(transformedShops);
     } catch (err) {
@@ -230,8 +244,8 @@ export default function App() {
           />
           <View style={styles.cardHeader}>
             <View style={styles.statusContainer}>
-              <View style={[styles.statusDot, { backgroundColor: item.isOpen ? '#4CAF50' : '#F44336' }]} />
-              <Text style={styles.statusText}>{item.isOpen ? 'Open now' : 'Closed'}</Text>
+              <View style={[styles.statusDot, { backgroundColor: (item.isOpen === true) ? '#4CAF50' : '#F44336' }]} />
+              <Text style={styles.statusText}>{(item.isOpen === true) ? 'Open now' : 'Closed'}</Text>
               {item.isCertified && (
                 <View style={styles.certifiedBadge}>
                   <Ionicons name="checkmark-circle" size={12} color="#4CAF50" />

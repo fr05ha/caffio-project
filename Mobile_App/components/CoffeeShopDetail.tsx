@@ -100,6 +100,13 @@ export default function CoffeeShopDetail({
       setLoading(true);
       setError(null);
       const cafeData = await apiService.getCafeById(cafeId);
+      // Debug: Log cafe data to check isOpen
+      console.log('Cafe details from API:', {
+        id: cafeData.id,
+        name: cafeData.name,
+        isOpen: cafeData.isOpen,
+        businessHours: cafeData.businessHours,
+      });
       setCafe(cafeData as CafeDetail);
       setSelectedCategory('All');
       setCart({});
@@ -418,9 +425,9 @@ export default function CoffeeShopDetail({
 
           {/* Open/Closed Status */}
           <View style={styles.statusRow}>
-            <View style={[styles.statusDot, { backgroundColor: cafe.isOpen ? '#4CAF50' : '#F44336' }]} />
-            <Text style={[styles.statusText, { color: cafe.isOpen ? '#4CAF50' : '#F44336' }]}>
-              {cafe.isOpen ? 'Open now' : 'Closed'}
+            <View style={[styles.statusDot, { backgroundColor: (cafe.isOpen === true) ? '#4CAF50' : '#F44336' }]} />
+            <Text style={[styles.statusText, { color: (cafe.isOpen === true) ? '#4CAF50' : '#F44336' }]}>
+              {(cafe.isOpen === true) ? 'Open now' : 'Closed'}
             </Text>
           </View>
 
