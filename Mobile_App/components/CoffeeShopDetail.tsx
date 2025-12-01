@@ -105,6 +105,8 @@ export default function CoffeeShopDetail({
         id: cafeData.id,
         name: cafeData.name,
         isOpen: cafeData.isOpen,
+        isOpenType: typeof cafeData.isOpen,
+        isOpenBoolean: cafeData.isOpen === true,
         businessHours: cafeData.businessHours,
       });
       setCafe(cafeData as CafeDetail);
@@ -753,12 +755,6 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   // Info Section
-  infoSection: {
-    padding: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-  },
   cafeHeader: {
     marginBottom: 12,
   },
