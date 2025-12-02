@@ -23,11 +23,15 @@ This project uses Stripe for test payments only. Follow these steps to set up St
 1. **Get Stripe Publishable Key:**
    - From the same Stripe dashboard, copy your **Publishable key** (starts with `pk_test_...`)
 
-2. **Update App.tsx:**
-   - In `Mobile_App/App.tsx`, replace the placeholder:
-   ```typescript
-   const STRIPE_PUBLISHABLE_KEY = 'pk_test_your_publishable_key_here';
+2. **Update app.json:**
+   - In `Mobile_App/app.json`, update the `extra.stripePublishableKey` field:
+   ```json
+   "extra": {
+     "stripePublishableKey": "pk_test_your_actual_publishable_key_here"
+   }
    ```
+   - The app will automatically read this value via `expo-constants`
+   - Alternatively, you can set it via environment variable `STRIPE_PUBLISHABLE_KEY` if using a build system that supports it
 
 ## Test Cards
 

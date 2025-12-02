@@ -22,10 +22,10 @@ import CoffeeShopDetail from './components/CoffeeShopDetail';
 import OrdersView from './components/OrdersView';
 import AuthScreen from './components/auth/AuthScreen';
 import { baseTheme } from './theme';
+import { ENV } from './config/env';
 
-// Stripe publishable key (test mode)
-// TODO: Replace with your actual Stripe test publishable key from https://dashboard.stripe.com/test/apikeys
-const STRIPE_PUBLISHABLE_KEY = 'pk_test_your_publishable_key_here';
+// Stripe publishable key (test mode) - loaded from environment
+const STRIPE_PUBLISHABLE_KEY = ENV.STRIPE_PUBLISHABLE_KEY;
 
 interface CoffeeShop {
   id: number;

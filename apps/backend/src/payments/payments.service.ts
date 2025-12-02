@@ -10,7 +10,12 @@ export class PaymentsService {
     // Use test mode - get from environment variable
     const stripeSecretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
     if (!stripeSecretKey) {
-      throw new Error('STRIPE_SECRET_KEY environment variable is required');
+      console.warn('STRIPE_SECRET_KEY not set. Payment features will not work. Set it in your .env file or environment variables.');
+      // Initialize with a dummy key to prevent crashes, but methods will fail gracefully
+      this.stripe = new Stripe('sk_test_placeholder', {
+        apiVersion: '2025-11-17.clover',
+      });
+      return;
     }
     this.stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2025-11-17.clover',
@@ -18,6 +23,11 @@ export class PaymentsService {
   }
 
   async createPaymentIntent(amount: number, currency: string = 'usd', metadata?: Record<string, string>): Promise<Stripe.PaymentIntent> {
+    const stripeSecretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
+    if (!stripeSecretKey || stripeSecretKey === 'sk_test_placeholder') {
+      throw new Error('STRIPE_SECRET_KEY is not configured. Please set it in your environment variables.');
+    }
+
     // Convert amount to cents (Stripe uses smallest currency unit)
     const amountInCents = Math.round(amount * 100);
 
