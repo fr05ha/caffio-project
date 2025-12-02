@@ -216,11 +216,35 @@ class ApiService {
     customerPhone?: string;
     customerName?: string;
     notes?: string;
+    paymentIntentId?: string;
+    paymentStatus?: string;
   }): Promise<Order> {
     return this.request<Order>('/orders', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  }
+
+  // Payments API
+  async createPaymentIntent(data: {
+    amount: number;
+    currency?: string;
+    orderId?: number;
+    customerId?: number;
+  }): Promise<{ clientSecret: string; paymentIntentId: string }> {
+    return this.request<{ clientSecret: string; paymentIntentId: string }>('/payments/create-intent', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getPaymentIntent(paymentIntentId: string): Promise<{
+    id: string;
+    status: string;
+    amount: number;
+    currency: string;
+  }> {
+    return this.request(`/payments/intent/${paymentIntentId}`);
   }
 
   async getOrdersByCustomer(customerId: number): Promise<Order[]> {
@@ -254,6 +278,8 @@ export interface Order {
   customerPhone?: string;
   customerName?: string;
   notes?: string;
+  paymentIntentId?: string;
+  paymentStatus?: string;
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];

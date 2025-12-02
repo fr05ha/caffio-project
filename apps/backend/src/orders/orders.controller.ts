@@ -28,6 +28,8 @@ export class OrdersController {
         customerPhone: { type: 'string' },
         customerName: { type: 'string' },
         notes: { type: 'string' },
+        paymentIntentId: { type: 'string' },
+        paymentStatus: { type: 'string' },
       },
     },
   })
@@ -40,6 +42,8 @@ export class OrdersController {
     customerPhone?: string;
     customerName?: string;
     notes?: string;
+    paymentIntentId?: string;
+    paymentStatus?: string;
   }) {
     return this.ordersService.create(data);
   }

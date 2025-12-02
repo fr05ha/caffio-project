@@ -14,6 +14,8 @@ export class OrdersService {
     customerPhone?: string;
     customerName?: string;
     notes?: string;
+    paymentIntentId?: string;
+    paymentStatus?: string;
   }) {
     // Calculate total and get item details
     const menuItems = await this.db.menuItem.findMany({
@@ -51,6 +53,8 @@ export class OrdersService {
           customerPhone: data.customerPhone,
           customerName: data.customerName,
           notes: data.notes,
+          paymentIntentId: data.paymentIntentId,
+          paymentStatus: data.paymentStatus || 'pending',
           status: 'pending',
           items: {
             create: orderItems,
@@ -130,6 +134,22 @@ export class OrdersService {
     return this.db.order.update({
       where: { id },
       data: { status },
+      include: {
+        items: {
+          include: {
+            menuItem: true,
+          },
+        },
+        customer: true,
+        cafe: true,
+      },
+    });
+  }
+
+  async updatePaymentStatus(id: number, paymentIntentId: string, paymentStatus: string) {
+    return this.db.order.update({
+      where: { id },
+      data: { paymentIntentId, paymentStatus },
       include: {
         items: {
           include: {

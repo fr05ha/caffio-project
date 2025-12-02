@@ -15,12 +15,17 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StripeProvider } from '@stripe/stripe-react-native';
 import { apiService, Cafe, Customer } from './services/api';
 import { LocationService, LocationData } from './services/location';
 import CoffeeShopDetail from './components/CoffeeShopDetail';
 import OrdersView from './components/OrdersView';
 import AuthScreen from './components/auth/AuthScreen';
 import { baseTheme } from './theme';
+
+// Stripe publishable key (test mode)
+// TODO: Replace with your actual Stripe test publishable key from https://dashboard.stripe.com/test/apikeys
+const STRIPE_PUBLISHABLE_KEY = 'pk_test_your_publishable_key_here';
 
 interface CoffeeShop {
   id: number;
@@ -303,40 +308,49 @@ export default function App() {
   };
 
   if (!currentCustomer) {
-    return <AuthScreen loading={authLoading} onLogin={handleLogin} onSignup={handleSignup} />;
+    return (
+      <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+        <AuthScreen loading={authLoading} onLogin={handleLogin} onSignup={handleSignup} />
+      </StripeProvider>
+    );
   }
 
   if (showOrders && currentCustomer) {
     return (
-      <OrdersView
-        customerId={currentCustomer.id}
-        onBack={() => setShowOrders(false)}
-      />
+      <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+        <OrdersView
+          customerId={currentCustomer.id}
+          onBack={() => setShowOrders(false)}
+        />
+      </StripeProvider>
     );
   }
 
   if (selectedCafeId !== null) {
     return (
-      <CoffeeShopDetail
-        cafeId={selectedCafeId}
-        onBack={handleBack}
-        customerId={currentCustomer?.id}
-        customerName={currentCustomer?.name || undefined}
-        customerPhone={undefined} // Can be added later if stored
-        isFavoriteCafe={favoriteCafeIds.includes(selectedCafeId)}
-        favoriteMenuItemIds={favoriteMenuItemIds}
-        onToggleCafeFavorite={toggleCafeFavorite}
-        onToggleMenuItemFavorite={toggleMenuItemFavorite}
-        onOrderPlaced={(order) => {
-          // Order placed, could navigate to order tracking
-          console.log('Order placed:', order);
-        }}
-      />
+      <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+        <CoffeeShopDetail
+          cafeId={selectedCafeId}
+          onBack={handleBack}
+          customerId={currentCustomer?.id}
+          customerName={currentCustomer?.name || undefined}
+          customerPhone={undefined} // Can be added later if stored
+          isFavoriteCafe={favoriteCafeIds.includes(selectedCafeId)}
+          favoriteMenuItemIds={favoriteMenuItemIds}
+          onToggleCafeFavorite={toggleCafeFavorite}
+          onToggleMenuItemFavorite={toggleMenuItemFavorite}
+          onOrderPlaced={(order) => {
+            // Order placed, could navigate to order tracking
+            console.log('Order placed:', order);
+          }}
+        />
+      </StripeProvider>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+      <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.topBar}>
           <View>
@@ -478,7 +492,8 @@ export default function App() {
           </>
         )}
       </ScrollView>
-    </View>
+      </View>
+    </StripeProvider>
   );
 }
 

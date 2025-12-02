@@ -7,6 +7,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { AuthModule } from './auth/auth.module';
 import { CustomersModule } from './customers/customers.module';
 import { OrdersModule } from './orders/orders.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { OrdersModule } from './orders/orders.module';
     AuthModule,
     CustomersModule,
     OrdersModule,
+    PaymentsModule,
   ],
   providers: [PrismaService],
 })

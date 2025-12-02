@@ -18,6 +18,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { baseTheme } from '../theme';
 import MenuItemDetail from './MenuItemDetail';
+import PaymentSheet from './PaymentSheet';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -61,8 +62,14 @@ export default function CoffeeShopDetail({
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'menu' | 'reviews' | 'info'>('menu');
   const [showOrderDialog, setShowOrderDialog] = useState(false);
+  const [showPaymentSheet, setShowPaymentSheet] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [orderType, setOrderType] = useState<'DINE_IN' | 'TAKE_AWAY' | 'DELIVERY'>('DELIVERY');
+  const [pendingOrderData, setPendingOrderData] = useState<{
+    items: Array<{ menuItemId: number; quantity: number }>;
+    orderType: 'DINE_IN' | 'TAKE_AWAY' | 'DELIVERY';
+    deliveryAddress?: string;
+  } | null>(null);
 
   const formatBusinessHours = (hours: BusinessHours | undefined): string => {
     if (!hours || typeof hours !== 'object') {
@@ -195,22 +202,41 @@ export default function CoffeeShopDetail({
       return;
     }
 
-    try {
-      const items = cartEntries.map((entry) => ({
-        menuItemId: entry.item.id,
-        quantity: entry.quantity,
-      }));
+    // Store order data and show payment sheet
+    const items = cartEntries.map((entry) => ({
+      menuItemId: entry.item.id,
+      quantity: entry.quantity,
+    }));
 
+    setPendingOrderData({
+      items,
+      orderType,
+      deliveryAddress: orderType === 'DELIVERY' ? deliveryAddress.trim() : undefined,
+    });
+
+    setShowOrderDialog(false);
+    setShowPaymentSheet(true);
+  };
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    if (!pendingOrderData || !customerId || !cafe) return;
+
+    try {
       const order = await apiService.createOrder({
         customerId,
         cafeId: cafe.id,
-        items,
-        orderType,
+        items: pendingOrderData.items,
+        orderType: pendingOrderData.orderType,
         customerName,
         customerPhone,
-        deliveryAddress: orderType === 'DELIVERY' ? deliveryAddress.trim() : undefined,
+        deliveryAddress: pendingOrderData.deliveryAddress,
         notes: `Order from ${cafe.name}`,
+        paymentIntentId,
+        paymentStatus: 'succeeded',
       });
+
+      setShowPaymentSheet(false);
+      setPendingOrderData(null);
 
       Alert.alert(
         'Order Placed!',
@@ -222,7 +248,6 @@ export default function CoffeeShopDetail({
               setCart({});
               setDeliveryAddress('');
               setOrderType('DELIVERY'); // Reset to default
-              setShowOrderDialog(false);
               if (onOrderPlaced) {
                 onOrderPlaced(order);
               }
@@ -233,7 +258,15 @@ export default function CoffeeShopDetail({
     } catch (error: any) {
       console.error('Error placing order:', error);
       Alert.alert('Error', error.message || 'Failed to place order. Please try again.');
+      setShowPaymentSheet(false);
+      setPendingOrderData(null);
     }
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPaymentSheet(false);
+    setPendingOrderData(null);
+    setShowOrderDialog(true);
   };
 
   const renderMenuItem = (item: MenuItem) => {
@@ -711,6 +744,17 @@ export default function CoffeeShopDetail({
           )}
         </>
       )}
+
+      {/* Payment Sheet */}
+      <PaymentSheet
+        amount={cartTotal}
+        currency="usd"
+        orderId={undefined}
+        customerId={customerId}
+        onSuccess={handlePaymentSuccess}
+        onCancel={handlePaymentCancel}
+        visible={showPaymentSheet}
+      />
     </View>
   );
 }
