@@ -2,7 +2,6 @@
 
 <div align="center">
 
-![Caffio Logo](./logo.png)
 
 **A comprehensive coffee shop management platform with admin dashboard, mobile app, and full-stack backend**
 
@@ -91,35 +90,6 @@ Caffio is a full-stack coffee shop management platform that enables cafe owners 
 - **Location**: Expo Location
 - **Notifications**: Expo Notifications
 
-## 🏗 Architecture
-
-```
-┌─────────────────┐
-│  Admin Dashboard│  (React + Vite)
-│   (Web App)     │
-└────────┬────────┘
-         │
-         │ HTTP/REST
-         │
-┌────────▼────────┐
-│   Backend API   │  (NestJS + Prisma)
-│   (Node.js)     │
-└────────┬────────┘
-         │
-         │ SQL
-         │
-┌────────▼────────┐
-│   PostgreSQL    │
-│   (Database)    │
-└─────────────────┘
-         │
-         │ HTTP/REST
-         │
-┌────────▼────────┐
-│   Mobile App    │  (React Native + Expo)
-│   (iOS/Android) │
-└─────────────────┘
-```
 
 ## 🚀 Getting Started
 
@@ -200,113 +170,6 @@ Caffio is a full-stack coffee shop management platform that enables cafe owners 
    npm run android
    ```
 
-### Default Admin Accounts
-
-After seeding, you'll have 3 admin accounts:
-
-1. **Mecca Coffee** (Brown theme)
-   - Email: `admin1@caffio.com`
-   - Password: `Admin123!`
-
-2. **Reuben Hills** (Green theme)
-   - Email: `admin2@caffio.com`
-   - Password: `Admin456!`
-
-3. **Oh Matcha** (Matcha theme)
-   - Email: `admin3@caffio.com`
-   - Password: `Admin789!`
-
-## 📁 Project Structure
-
-```
-caffio-project/
-├── apps/
-│   └── backend/                 # NestJS Backend API
-│       ├── prisma/              # Database schema & migrations
-│       │   ├── schema.prisma    # Prisma schema definition
-│       │   └── migrations/     # Database migrations
-│       ├── scripts/             # Seed & utility scripts
-│       ├── src/                 # Source code
-│       │   ├── auth/           # Authentication module
-│       │   ├── cafes/          # Cafe management
-│       │   ├── customers/      # Customer management
-│       │   ├── menus/          # Menu management
-│       │   ├── orders/         # Order management
-│       │   ├── payments/       # Payment processing
-│       │   ├── reviews/        # Review system
-│       │   └── main.ts         # Application entry point
-│       └── package.json
-│
-├── frontend/                    # Admin Dashboard (React)
-│   ├── src/
-│   │   ├── components/         # React components
-│   │   │   ├── admin/         # Admin dashboard components
-│   │   │   └── ui/            # UI component library
-│   │   ├── services/          # API client
-│   │   ├── hooks/             # Custom React hooks
-│   │   └── types/             # TypeScript types
-│   └── package.json
-│
-├── Mobile_App/                  # Mobile App (React Native + Expo)
-│   ├── components/            # React Native components
-│   ├── services/              # API & location services
-│   ├── theme/                 # Theme configuration
-│   ├── assets/                # Images & icons
-│   └── package.json
-│
-└── database/                   # Database backups & utilities
-    └── db_backup.sql
-```
-
-## 📚 API Documentation
-
-### Base URL
-```
-http://localhost:3000
-```
-
-### Main Endpoints
-
-#### Authentication
-- `POST /auth/login` - Admin login
-- `POST /auth/signup` - Admin registration
-
-#### Cafes
-- `GET /cafes` - List all cafes (with optional lat/lon for distance)
-- `GET /cafes/:id` - Get cafe details
-- `PUT /cafes/:id` - Update cafe information
-
-#### Menus
-- `GET /menus/:cafeId` - Get menu for a cafe
-- `POST /menus/items` - Add menu item
-- `PUT /menus/items/:id` - Update menu item
-- `DELETE /menus/items/:id` - Delete menu item
-
-#### Orders
-- `POST /orders` - Create new order
-- `GET /orders` - List orders (filtered by cafe or customer)
-- `GET /orders/:id` - Get order details
-- `PUT /orders/:id/status` - Update order status
-
-#### Reviews
-- `GET /reviews/:cafeId` - Get reviews for a cafe
-- `POST /reviews` - Create review
-
-#### Customers
-- `POST /customers/signup` - Customer registration
-- `POST /customers/login` - Customer login
-- `GET /customers/:id` - Get customer profile
-
-#### Payments
-- `POST /payments/create-intent` - Create Stripe payment intent
-- `GET /payments/intent/:id` - Get payment intent status
-
-### API Documentation (Swagger)
-
-When the backend is running, visit:
-```
-http://localhost:3000/api
-```
 
 ## 🌐 Deployment
 
@@ -359,64 +222,6 @@ eas build --platform ios
 eas build --platform android
 ```
 
-## 🔐 Environment Variables
-
-### Backend (.env)
-
-```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/caffio?schema=public"
-
-# Server
-PORT=3000
-NODE_ENV=development
-
-# Authentication
-JWT_SECRET="your-secret-key-here"
-JWT_EXPIRES_IN=7d
-
-# CORS
-CORS_ORIGIN="http://localhost:5173"
-
-# Stripe (Optional)
-STRIPE_SECRET_KEY="sk_test_..."
-```
-
-### Frontend
-
-Update `src/services/api.ts` with your backend URL:
-```typescript
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-```
-
-### Mobile App
-
-Update `services/api.ts` with your backend URL:
-```typescript
-const API_BASE_URL = 'https://your-backend-url.onrender.com';
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow TypeScript best practices
-- Write meaningful commit messages
-- Add comments for complex logic
-- Test your changes thoroughly
-- Update documentation as needed
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🙏 Acknowledgments
 
@@ -436,6 +241,7 @@ For issues, questions, or contributions, please open an issue on GitHub.
 
 **Made with ❤️ for coffee lovers**
 
-[Report Bug](https://github.com/fr05ha/caffio-project/issues) · [Request Feature](https://github.com/fr05ha/caffio-project/issues)
+[Report Bug](https://github.com/fr05ha/caffio-project/issues) · 
+[Request Feature](https://github.com/fr05ha/caffio-project/issues)
 
 </div>
