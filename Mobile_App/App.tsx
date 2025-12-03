@@ -294,13 +294,11 @@ export default function App() {
           </View>
 
           <View style={styles.cardFooter}>
-            <View>
-              <Text style={styles.cardFooterLabel}>Signature vibe</Text>
-              <Text style={styles.cardFooterText}>{item.address}</Text>
-            </View>
-            <View style={styles.viewButton}>
-              <Text style={styles.viewButtonText}>See menu</Text>
-              <Ionicons name="arrow-forward" size={16} color={baseTheme.palette.brandBrown} />
+            <View style={styles.addressContainer}>
+              <Ionicons name="location-outline" size={14} color={baseTheme.palette.textSecondary} />
+              <Text style={styles.cardFooterText} numberOfLines={1} ellipsizeMode="tail">
+                {item.address && item.address.length > 40 ? `${item.address.substring(0, 40)}...` : item.address}
+              </Text>
             </View>
           </View>
         </LinearGradient>
@@ -736,8 +734,13 @@ const styles = StyleSheet.create({
   },
   cardFooter: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  addressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 6,
   },
   cardFooterLabel: {
     fontSize: 12,
@@ -746,22 +749,9 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   cardFooterText: {
-    fontSize: 14,
-    color: baseTheme.palette.textPrimary,
-    marginTop: 2,
-  },
-  viewButton: {
-    backgroundColor: baseTheme.palette.cream,
-    borderRadius: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  viewButtonText: {
-    color: baseTheme.palette.brandBrown,
-    fontWeight: '600',
-    marginRight: 6,
+    fontSize: 13,
+    color: baseTheme.palette.textSecondary,
+    flex: 1,
   },
   sectionHeader: {
     flexDirection: 'row',

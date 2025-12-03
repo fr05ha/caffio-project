@@ -7,7 +7,7 @@ import { MenuPage } from './components/admin/MenuPage';
 import { ReviewsPage } from './components/admin/ReviewsPage';
 import { DeliveryPage } from './components/admin/DeliveryPage';
 import { SettingsPage } from './components/admin/SettingsPage';
-import { adminOrders, reviews, deliveryDrivers } from './data/adminMockData';
+import { adminOrders, deliveryDrivers } from './data/adminMockData';
 import { menuItems as customerMenuItems } from './data/mockData';
 import { api, Cafe } from './services/api';
 import { Order, MenuItem, Review } from './types';
@@ -24,7 +24,7 @@ export default function App() {
   };
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>(customerMenuItems?.['1'] ?? []);
-  const reviewsList = useState<Review[]>(reviews)[0];
+  const [reviewsList, setReviewsList] = useState<Review[]>([]);
   const [backendAverageRating, setBackendAverageRating] = useState<number>(0);
   const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null);
   const [selectedCafeId, setSelectedCafeId] = useState<number | null>(null);
@@ -98,6 +98,18 @@ export default function App() {
           deliveryAddress: order.deliveryAddress || '',
         }));
         setOrders(mappedOrders);
+
+        // Load reviews for cafe
+        const reviewsData = await api.getReviewsByCafe(selectedCafeId);
+        const mappedReviews: Review[] = reviewsData.map((review) => ({
+          id: String(review.id),
+          customerName: review.customerName || review.customer?.name || 'Anonymous',
+          rating: review.rating,
+          comment: review.text || '',
+          date: review.createdAt,
+          orderId: '', // Reviews are not necessarily tied to orders
+        }));
+        setReviewsList(mappedReviews);
       } catch (e) {
         // Clear on error and log
         console.warn('Failed to load from API, clearing menu data', e);
@@ -105,6 +117,7 @@ export default function App() {
         setSelectedMenuId(null);
         setBackendAverageRating(0);
         setOrders([]);
+        setReviewsList([]);
       }
     }
     loadData();

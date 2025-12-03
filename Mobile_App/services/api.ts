@@ -55,9 +55,16 @@ export interface MenuItem {
 export interface Review {
   id: number;
   cafeId: number;
+  customerId?: number;
+  customerName?: string;
   rating: number;
   text?: string;
   createdAt: string;
+  customer?: {
+    id: number;
+    name?: string | null;
+    email: string;
+  } | null;
 }
 
 export interface Customer {
@@ -155,10 +162,10 @@ class ApiService {
     return this.request<Review[]>(`/reviews/${cafeId}`);
   }
 
-  async createReview(cafeId: number, rating: number, text?: string): Promise<Review> {
+  async createReview(data: { cafeId: number; customerId?: number; customerName?: string; rating: number; text?: string }): Promise<Review> {
     return this.request<Review>('/reviews', {
       method: 'POST',
-      body: JSON.stringify({ cafeId, rating, text }),
+      body: JSON.stringify(data),
     });
   }
 

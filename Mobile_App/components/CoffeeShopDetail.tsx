@@ -11,6 +11,7 @@ import {
   Platform,
   Alert,
   TextInput,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { apiService, Cafe, Menu, MenuItem, BusinessHours, Order } from '../services/api';
@@ -100,6 +101,10 @@ export default function CoffeeShopDetail({
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [cart, setCart] = useState<Record<number, { item: MenuItem; quantity: number; customizations?: Record<string, string>; totalPrice: number }>>({});
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     loadCafeDetails();
@@ -268,6 +273,41 @@ export default function CoffeeShopDetail({
     setShowPaymentSheet(false);
     setPendingOrderData(null);
     setShowOrderDialog(true);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewRating || !cafe || !customerId) {
+      Alert.alert('Error', 'Please select a rating');
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      await apiService.createReview({
+        cafeId: cafe.id,
+        customerId,
+        customerName: customerName || undefined,
+        rating: reviewRating,
+        text: reviewText.trim() || undefined,
+      });
+      
+      Alert.alert('Success', 'Your review has been submitted!', [
+        {
+          text: 'OK',
+          onPress: () => {
+            setShowReviewDialog(false);
+            setReviewRating(0);
+            setReviewText('');
+            loadCafeDetails(); // Reload to show new review
+          },
+        },
+      ]);
+    } catch (error: any) {
+      console.error('Error submitting review:', error);
+      Alert.alert('Error', error.message || 'Failed to submit review. Please try again.');
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   const renderMenuItem = (item: MenuItem) => {
@@ -564,20 +604,36 @@ export default function CoffeeShopDetail({
 
         {activeTab === 'reviews' && (
           <View style={styles.infoContainer}>
-            <Text style={styles.infoTitle}>Reviews</Text>
+            <View style={styles.reviewsHeader}>
+              <Text style={styles.infoTitle}>Reviews</Text>
+              {customerId && (
+                <TouchableOpacity
+                  style={styles.addReviewButton}
+                  onPress={() => setShowReviewDialog(true)}
+                >
+                  <Ionicons name="add-circle-outline" size={20} color={baseTheme.palette.brandBrown} />
+                  <Text style={styles.addReviewButtonText}>Add Review</Text>
+                </TouchableOpacity>
+              )}
+            </View>
             {cafe.reviews && cafe.reviews.length > 0 ? (
               cafe.reviews.map((review: any, index: number) => (
                 <View key={index} style={styles.reviewItem}>
                   <View style={styles.reviewHeader}>
-                    <View style={styles.reviewRating}>
-                      {[...Array(5)].map((_, i) => (
-                        <Ionicons
-                          key={i}
-                          name={i < review.rating ? 'star' : 'star-outline'}
-                          size={16}
-                          color="#FFC107"
-                        />
-                      ))}
+                    <View style={styles.reviewUserInfo}>
+                      <Text style={styles.reviewUserName}>
+                        {review.customerName || review.customer?.name || 'Anonymous'}
+                      </Text>
+                      <View style={styles.reviewRating}>
+                        {[...Array(5)].map((_, i) => (
+                          <Ionicons
+                            key={i}
+                            name={i < review.rating ? 'star' : 'star-outline'}
+                            size={16}
+                            color="#FFC107"
+                          />
+                        ))}
+                      </View>
                     </View>
                     <Text style={styles.reviewDate}>
                       {new Date(review.createdAt).toLocaleDateString()}
@@ -590,6 +646,14 @@ export default function CoffeeShopDetail({
               <View style={styles.emptyMenu}>
                 <Ionicons name="chatbubbles-outline" size={48} color="#BDBDBD" />
                 <Text style={styles.emptyMenuText}>No reviews yet</Text>
+                {customerId && (
+                  <TouchableOpacity
+                    style={styles.addFirstReviewButton}
+                    onPress={() => setShowReviewDialog(true)}
+                  >
+                    <Text style={styles.addFirstReviewButtonText}>Be the first to review</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
           </View>
@@ -744,6 +808,83 @@ export default function CoffeeShopDetail({
             </View>
           )}
         </>
+      )}
+
+      {/* Review Dialog */}
+      {showReviewDialog && (
+        <Modal
+          visible={showReviewDialog}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowReviewDialog(false)}
+        >
+          <View style={styles.dialogOverlay}>
+            <View style={styles.dialog}>
+              <Text style={styles.dialogTitle}>Write a Review</Text>
+              <Text style={styles.dialogSubtitle}>Share your experience with {cafe?.name}</Text>
+
+              {/* Star Rating */}
+              <View style={styles.ratingContainer}>
+                <Text style={styles.ratingLabel}>Rating</Text>
+                <View style={styles.starContainer}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <TouchableOpacity
+                      key={star}
+                      onPress={() => {
+                        setReviewRating(star);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                      style={styles.starButton}
+                    >
+                      <Ionicons
+                        name={star <= reviewRating ? 'star' : 'star-outline'}
+                        size={32}
+                        color={star <= reviewRating ? '#FFC107' : '#E0E0E0'}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Review Text */}
+              <Text style={styles.ratingLabel}>Your Review (Optional)</Text>
+              <TextInput
+                style={styles.reviewTextInput}
+                placeholder="Tell others about your experience..."
+                placeholderTextColor="#8D6E63"
+                value={reviewText}
+                onChangeText={setReviewText}
+                multiline
+                numberOfLines={4}
+                maxLength={500}
+              />
+
+              <View style={styles.dialogButtons}>
+                <TouchableOpacity
+                  style={[styles.dialogButton, styles.dialogButtonCancel]}
+                  onPress={() => {
+                    setShowReviewDialog(false);
+                    setReviewRating(0);
+                    setReviewText('');
+                  }}
+                >
+                  <Text style={styles.dialogButtonTextCancel}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.dialogButton, styles.dialogButtonConfirm, !reviewRating && styles.dialogButtonDisabled]}
+                  onPress={handleSubmitReview}
+                  disabled={!reviewRating || submittingReview}
+                >
+                  {submittingReview ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.dialogButtonText}>Submit</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       )}
 
       {/* Payment Sheet */}
@@ -1013,20 +1154,64 @@ const styles = StyleSheet.create({
     color: '#8D6E63',
     lineHeight: 20,
   },
+  reviewsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  addReviewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: baseTheme.palette.cream,
+    borderRadius: 12,
+  },
+  addReviewButtonText: {
+    color: baseTheme.palette.brandBrown,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  addFirstReviewButton: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: baseTheme.palette.brandBrown,
+    borderRadius: 12,
+  },
+  addFirstReviewButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 14,
+  },
   reviewItem: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
   reviewHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 8,
+  },
+  reviewUserInfo: {
+    flex: 1,
+  },
+  reviewUserName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#5D4037',
+    marginBottom: 4,
   },
   reviewRating: {
     flexDirection: 'row',
+    marginTop: 4,
   },
   reviewDate: {
     fontSize: 12,
@@ -1036,6 +1221,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#5D4037',
     lineHeight: 20,
+    marginTop: 8,
+  },
+  ratingContainer: {
+    marginBottom: 20,
+  },
+  ratingLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#5D4037',
+    marginBottom: 12,
+  },
+  starContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  starButton: {
+    padding: 4,
+  },
+  reviewTextInput: {
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
+    color: '#5D4037',
+    minHeight: 100,
+    textAlignVertical: 'top',
+    marginBottom: 20,
+    backgroundColor: '#FAFAFA',
+  },
+  dialogButtonDisabled: {
+    opacity: 0.5,
   },
   // Menu Section
   menuContainer: {

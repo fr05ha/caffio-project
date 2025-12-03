@@ -66,12 +66,15 @@ model MenuItem {
 }
 
 model Review {
-  id        Int      @id @default(autoincrement())
-  cafeId    Int
-  rating    Int
-  text      String?
-  createdAt DateTime @default(now())
-  cafe      Cafe     @relation(fields: [cafeId], references: [id])
+  id         Int       @id @default(autoincrement())
+  cafeId     Int
+  customerId Int?
+  customerName String?
+  rating     Int
+  text       String?
+  createdAt  DateTime  @default(now())
+  cafe       Cafe      @relation(fields: [cafeId], references: [id])
+  customer   Customer? @relation(fields: [customerId], references: [id])
 }
 
 model Customer {
@@ -83,6 +86,7 @@ model Customer {
   favoriteCafes     CustomerFavoriteCafe[]
   favoriteMenuItems CustomerFavoriteMenuItem[]
   orders            Order[]
+  reviews           Review[]
 }
 
 model CustomerFavoriteCafe {

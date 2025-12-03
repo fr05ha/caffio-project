@@ -117,7 +117,6 @@ export function ReviewsPage({ reviews }: ReviewsPageProps) {
                       </span>
                     </div>
                   </div>
-                  <Badge variant="outline">Order {review.orderId}</Badge>
                 </div>
                 <p className="text-gray-700">{review.comment}</p>
               </div>

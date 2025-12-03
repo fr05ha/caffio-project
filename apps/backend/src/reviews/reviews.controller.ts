@@ -14,8 +14,18 @@ export class ReviewsController {
   }
 
   @Post()
-  @ApiBody({ schema: { properties: { cafeId: { type: 'number' }, rating: { type: 'number' }, text: { type: 'string' } } } })
-  async create(@Body() data: { cafeId: number; rating: number; text?: string }) {
+  @ApiBody({ 
+    schema: { 
+      properties: { 
+        cafeId: { type: 'number' }, 
+        customerId: { type: 'number' },
+        customerName: { type: 'string' },
+        rating: { type: 'number' }, 
+        text: { type: 'string' } 
+      } 
+    } 
+  })
+  async create(@Body() data: { cafeId: number; customerId?: number; customerName?: string; rating: number; text?: string }) {
     return this.reviewsService.create(data);
   }
 }

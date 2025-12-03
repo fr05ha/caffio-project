@@ -69,9 +69,16 @@ export type MenuDto = {
 export type ReviewDto = {
   id: number;
   cafeId: number;
+  customerId?: number | null;
+  customerName?: string | null;
   rating: number;
   text?: string | null;
   createdAt: string;
+  customer?: {
+    id: number;
+    name?: string | null;
+    email: string;
+  } | null;
 };
 
 export type OrderItemDto = {
