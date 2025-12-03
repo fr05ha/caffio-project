@@ -42,6 +42,10 @@ export class OrdersService {
     });
 
     // Create order with items in a transaction
+    // If payment is successful, automatically set status to 'preparing'
+    const paymentStatus = data.paymentStatus || 'pending';
+    const initialStatus = paymentStatus === 'succeeded' ? 'preparing' : 'pending';
+    
     return this.db.$transaction(async (tx) => {
       const order = await tx.order.create({
         data: {
@@ -54,8 +58,8 @@ export class OrdersService {
           customerName: data.customerName,
           notes: data.notes,
           paymentIntentId: data.paymentIntentId,
-          paymentStatus: data.paymentStatus || 'pending',
-          status: 'pending',
+          paymentStatus: paymentStatus,
+          status: initialStatus,
           items: {
             create: orderItems,
           },
@@ -147,9 +151,15 @@ export class OrdersService {
   }
 
   async updatePaymentStatus(id: number, paymentIntentId: string, paymentStatus: string) {
+    // If payment is successful, automatically update order status to 'preparing'
+    const updateData: any = { paymentIntentId, paymentStatus };
+    if (paymentStatus === 'succeeded') {
+      updateData.status = 'preparing';
+    }
+    
     return this.db.order.update({
       where: { id },
-      data: { paymentIntentId, paymentStatus },
+      data: updateData,
       include: {
         items: {
           include: {

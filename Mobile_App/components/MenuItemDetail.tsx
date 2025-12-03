@@ -356,7 +356,6 @@ export default function MenuItemDetail({
             {item.description && (
               <Text style={styles.itemDescription}>{item.description}</Text>
             )}
-            <Text style={styles.basePrice}>${item.price.toFixed(2)}</Text>
           </View>
         </View>
 

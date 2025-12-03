@@ -115,11 +115,14 @@ export default function CoffeeShopDetail({
       setLoading(true);
       setError(null);
       const cafeData = await apiService.getCafeById(cafeId);
-      // Remove duplicate reviews by id
+      // Remove duplicate reviews by id and filter out mock reviews (only show reviews with customerId or customerName)
       if (cafeData.reviews && Array.isArray(cafeData.reviews)) {
         cafeData.reviews = Array.from(
           new Map(cafeData.reviews.map((review: any) => [review.id, review])).values()
-        );
+        ).filter((review: any) => {
+          // Only show reviews that have customerId or customerName (real user reviews)
+          return review.customerId || review.customerName || review.customer?.id || review.customer?.name;
+        });
       }
       setCafe(cafeData as CafeDetail);
       setSelectedCategory('All');
