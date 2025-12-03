@@ -110,11 +110,15 @@ export default function App() {
         // Use isOpen directly from API - backend calculates it based on business hours
         // Backend returns boolean, so we use it directly
         const isOpenValue = cafe.isOpen === true;
+        // Use real rating from API, default to 0 if not available
+        const rating = typeof cafe.ratingAvg === 'number' && cafe.ratingAvg > 0 ? cafe.ratingAvg : 0;
+        // Use real rating count from API
+        const ratingCount = typeof cafe.ratingCount === 'number' ? cafe.ratingCount : 0;
         return {
           id: cafe.id,
           name: cafe.name,
           address: cafe.address || 'Address not available',
-          rating: cafe.ratingAvg,
+          rating: rating, // Real rating from API, 0 if no ratings yet
           distance: location
             ? LocationService.formatDistance(
                 LocationService.calculateDistance(location.latitude, location.longitude, cafe.lat, cafe.lon),
@@ -122,7 +126,7 @@ export default function App() {
             : `${(index + 1) * 200}m`,
           isOpen: isOpenValue,
         isCertified: cafe.isCertified,
-        description: cafe.description || `Rated by ${cafe.ratingCount} customers`,
+        description: cafe.description || (ratingCount > 0 ? `Rated by ${ratingCount} customers` : 'New cafe'),
         priceRange: '$$',
           image:
             cafe.profileImageUrl ||
@@ -282,10 +286,12 @@ export default function App() {
               <Ionicons name="location-outline" size={14} color={baseTheme.palette.textSecondary} />
               <Text style={styles.metaText}>{item.distance}</Text>
             </View>
-            <View style={styles.metaChip}>
-              <Ionicons name="star" size={14} color="#FFC107" />
-              <Text style={styles.metaText}>{item.rating.toFixed(1)}</Text>
-            </View>
+            {item.rating > 0 ? (
+              <View style={styles.metaChip}>
+                <Ionicons name="star" size={14} color="#FFC107" />
+                <Text style={styles.metaText}>{item.rating.toFixed(1)}</Text>
+              </View>
+            ) : null}
             <View style={styles.metaChip}>
               <Ionicons name="cash-outline" size={14} color={baseTheme.palette.textSecondary} />
               <Text style={styles.metaText}>{item.priceRange}</Text>
@@ -478,7 +484,7 @@ export default function App() {
                   <View style={styles.listingContent}>
                     <Text style={styles.listingName}>{shop.name}</Text>
                     <Text style={styles.listingMeta}>
-                      {shop.distance} • {shop.rating.toFixed(1)} ★
+                      {shop.distance}{shop.rating > 0 ? ` • ${shop.rating.toFixed(1)} ★` : ''}
                     </Text>
                   </View>
                   <View style={styles.listingButton}>

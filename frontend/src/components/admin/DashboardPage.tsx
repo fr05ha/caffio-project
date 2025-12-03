@@ -21,38 +21,69 @@ export function DashboardPage({ orders, averageRating }: DashboardPageProps) {
   const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'preparing').length;
   const completedToday = todayOrders.filter(o => o.status === 'delivered').length;
 
-  const weekData = [
-    { day: 'Mon', orders: 45, revenue: 450 },
-    { day: 'Tue', orders: 52, revenue: 520 },
-    { day: 'Wed', orders: 48, revenue: 480 },
-    { day: 'Thu', orders: 61, revenue: 610 },
-    { day: 'Fri', orders: 78, revenue: 780 },
-    { day: 'Sat', orders: 85, revenue: 850 },
-    { day: 'Sun', orders: 72, revenue: 720 },
-  ];
+  // Calculate real weekly data from orders (last 7 days)
+  const weekData = (() => {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    
+    return days.map((day, index) => {
+      const dayDate = new Date();
+      dayDate.setDate(dayDate.getDate() - (6 - index));
+      const dayStart = new Date(dayDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayDate);
+      dayEnd.setHours(23, 59, 59, 999);
+      
+      const dayOrders = orders.filter(order => {
+        const orderDate = new Date(order.orderTime);
+        return orderDate >= dayStart && orderDate <= dayEnd;
+      });
+      
+      return {
+        day,
+        orders: dayOrders.length,
+        revenue: dayOrders.reduce((sum, order) => sum + order.total, 0),
+      };
+    });
+  })();
 
   const recentOrders = orders.slice(0, 5);
+
+  // Calculate real trends from orders
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayOrders = orders.filter(order => {
+    const orderDate = new Date(order.orderTime);
+    return orderDate.toDateString() === yesterday.toDateString();
+  });
+  const yesterdayRevenue = yesterdayOrders.reduce((sum, order) => sum + order.total, 0);
+  
+  const revenueTrend = yesterdayRevenue > 0 
+    ? `${((todayRevenue - yesterdayRevenue) / yesterdayRevenue * 100).toFixed(1)}%`
+    : todayRevenue > 0 ? '100%' : '0%';
+  const ordersTrend = yesterdayOrders.length > 0
+    ? `${((todayOrders.length - yesterdayOrders.length) / yesterdayOrders.length * 100).toFixed(1)}%`
+    : todayOrders.length > 0 ? '100%' : '0%';
 
   const stats = [
     {
       title: "Today's Revenue",
       value: `$${todayRevenue.toFixed(2)}`,
       icon: DollarSign,
-      trend: '+12.5%',
+      trend: todayRevenue >= yesterdayRevenue ? `+${revenueTrend}` : revenueTrend,
       color: 'bg-green-500',
     },
     {
       title: "Today's Orders",
       value: todayOrders.length.toString(),
       icon: ShoppingBag,
-      trend: '+8.2%',
+      trend: todayOrders.length >= yesterdayOrders.length ? `+${ordersTrend}` : ordersTrend,
       color: 'bg-blue-500',
     },
     {
       title: 'Average Rating',
-      value: averageRating.toFixed(1),
+      value: averageRating > 0 ? averageRating.toFixed(1) : '0.0',
       icon: Star,
-      trend: '+0.3',
+      trend: averageRating > 0 ? `${averageRating.toFixed(1)} ⭐` : 'No ratings',
       color: 'bg-yellow-500',
     },
     {

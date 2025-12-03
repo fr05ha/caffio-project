@@ -528,11 +528,18 @@ export default function CoffeeShopDetail({
               )}
             </View>
             
-            <View style={styles.ratingRow}>
-              <Ionicons name="star" size={20} color="#FFC107" />
-              <Text style={styles.ratingText}>{cafe.ratingAvg.toFixed(1)}</Text>
-              <Text style={styles.ratingCount}>({cafe.ratingCount} reviews)</Text>
-            </View>
+            {cafe.ratingAvg > 0 && cafe.ratingCount > 0 ? (
+              <View style={styles.ratingRow}>
+                <Ionicons name="star" size={20} color="#FFC107" />
+                <Text style={styles.ratingText}>{cafe.ratingAvg.toFixed(1)}</Text>
+                <Text style={styles.ratingCount}>({cafe.ratingCount} reviews)</Text>
+              </View>
+            ) : (
+              <View style={styles.ratingRow}>
+                <Ionicons name="star-outline" size={20} color="#BDBDBD" />
+                <Text style={styles.ratingText}>No ratings yet</Text>
+              </View>
+            )}
           </View>
 
           {cafe.address && (
