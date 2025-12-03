@@ -13,6 +13,19 @@
 
 </div>
 
+## 📋 Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [API Documentation](#api-documentation)
+- [Deployment](#deployment)
+- [Environment Variables](#environment-variables)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## 🎯 Overview
 
@@ -77,6 +90,85 @@ Caffio is a full-stack coffee shop management platform that enables cafe owners 
 - **Location**: Expo Location
 - **Notifications**: Expo Notifications
 
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js** v18+ ([Download](https://nodejs.org/))
+- **PostgreSQL** v14+ ([Download](https://www.postgresql.org/download/))
+- **Git** ([Download](https://git-scm.com/))
+- **npm** or **yarn**
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/fr05ha/caffio-project.git
+   cd caffio-project
+   ```
+
+2. **Set up the database**
+   ```bash
+   # Create PostgreSQL database
+   createdb caffio
+   # Or using psql:
+   psql -U postgres -c "CREATE DATABASE caffio;"
+   ```
+
+3. **Backend Setup**
+   ```bash
+   cd apps/backend
+   npm install
+   
+   # Create .env file
+   echo 'DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@localhost:5432/caffio?schema=public"' > .env
+   echo 'JWT_SECRET="your-secret-key-here"' >> .env
+   echo 'PORT=3000' >> .env
+   echo 'CORS_ORIGIN="http://localhost:5173"' >> .env
+   
+   # Run migrations
+   npx prisma migrate deploy
+   
+   # Generate Prisma Client
+   npx prisma generate
+   
+   # Seed database
+   npx tsx scripts/seed-admin-accounts.ts
+   npx tsx scripts/add-oh-matcha.ts
+   npx tsx scripts/set-cafe-themes.ts
+   
+   # Start backend server
+   npm run start:dev
+   ```
+
+4. **Frontend Setup** (Admin Dashboard)
+   ```bash
+   cd frontend
+   npm install
+   
+   # Update API URL in src/services/api.ts if needed
+   # Default: http://localhost:3000
+   
+   # Start development server
+   npm run dev
+   ```
+
+5. **Mobile App Setup**
+   ```bash
+   cd Mobile_App
+   npm install
+   
+   # Update API URL in services/api.ts if needed
+   # Default: http://localhost:3000
+   
+   # Start Expo development server
+   npm start
+   # Or for iOS simulator:
+   npm run ios
+   # Or for Android:
+   npm run android
+   ```
 
 
 ## 🌐 Deployment
@@ -153,3 +245,6 @@ For issues, questions, or contributions, please open an issue on GitHub.
 [Request Feature](https://github.com/fr05ha/caffio-project/issues)
 
 </div>
+
+
+
