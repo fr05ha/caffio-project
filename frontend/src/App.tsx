@@ -263,10 +263,13 @@ export default function App() {
               onAddItem={handleAddMenuItem}
               onUpdateItem={handleUpdateMenuItem}
               onDeleteItem={handleDeleteMenuItem}
+              cafeName={currentCafe?.name}
+              cafeAddress={currentCafe?.address || undefined}
+              cafeDescription={currentCafe?.description || undefined}
             />
           )}
           {currentPage === 'reviews' && (
-            <ReviewsPage reviews={reviewsList} />
+            <ReviewsPage reviews={reviewsList} cafeName={currentCafe?.name} />
           )}
           {currentPage === 'delivery' && (
             <DeliveryPage drivers={deliveryDrivers} orders={orders} />

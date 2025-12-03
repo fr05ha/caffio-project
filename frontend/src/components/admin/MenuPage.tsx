@@ -18,9 +18,12 @@ interface MenuPageProps {
   onAddItem: (item: Omit<MenuItem, 'id'>) => void;
   onUpdateItem: (id: string, item: Partial<MenuItem>) => void;
   onDeleteItem: (id: string) => void;
+  cafeName?: string;
+  cafeAddress?: string;
+  cafeDescription?: string;
 }
 
-export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem }: MenuPageProps) {
+export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, cafeName = 'Cafe', cafeAddress, cafeDescription }: MenuPageProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -99,10 +102,9 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem }: M
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="mb-2">Oh Matcha Menu</h1>
-          <p className="text-gray-600">Shop 11/501 George St, Sydney NSW 2000</p>
-          <p className="text-gray-600">Authentic Japanese flavors, dairy-free options, and health benefits of matcha.</p>
-          <p className="text-gray-600">Hours: Mon–Wed/Sun 9:00AM–9:30PM, Thu–Sat 9:00AM–10PM</p>
+          <h1 className="mb-2">{cafeName} Menu</h1>
+          {cafeAddress && <p className="text-gray-600">{cafeAddress}</p>}
+          {cafeDescription && <p className="text-gray-600">{cafeDescription}</p>}
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>

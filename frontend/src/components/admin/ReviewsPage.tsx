@@ -7,9 +7,10 @@ import { Progress } from '../ui/progress';
 
 interface ReviewsPageProps {
   reviews: Review[];
+  cafeName?: string;
 }
 
-export function ReviewsPage({ reviews }: ReviewsPageProps) {
+export function ReviewsPage({ reviews, cafeName = 'Cafe' }: ReviewsPageProps) {
   const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
   
   const ratingDistribution = [5, 4, 3, 2, 1].map(rating => ({
@@ -29,8 +30,8 @@ export function ReviewsPage({ reviews }: ReviewsPageProps) {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="mb-2">Oh Matcha Reviews</h1>
-        <p className="text-gray-600">Enjoy authentic Japanese flavors, health benefits of matcha, and dairy-free options at Shop 11/501 George St, Sydney NSW 2000.</p>
+        <h1 className="mb-2">{cafeName} Reviews</h1>
+        <p className="text-gray-600">Customer reviews and ratings for {cafeName}</p>
       </div>
 
       {/* Rating Summary */}

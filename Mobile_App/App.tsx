@@ -108,9 +108,8 @@ export default function App() {
 
       const transformedShops: CoffeeShop[] = cafes.map((cafe, index) => {
         // Use isOpen directly from API - backend calculates it based on business hours
-        // Handle undefined/null cases - default to true if not set (as per backend logic)
-        // Explicitly check for boolean true to ensure proper evaluation
-        const isOpenValue = typeof cafe.isOpen === 'boolean' ? cafe.isOpen : (cafe.isOpen === true || cafe.isOpen === undefined);
+        // Backend returns boolean, so we use it directly
+        const isOpenValue = cafe.isOpen === true;
         return {
           id: cafe.id,
           name: cafe.name,

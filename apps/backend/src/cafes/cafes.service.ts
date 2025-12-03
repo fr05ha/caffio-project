@@ -91,9 +91,9 @@ export class CafesService {
 
   isCafeOpen(businessHours: any): boolean {
     try {
-      // Handle null, undefined, or empty values - default to open if not set
+      // Handle null, undefined, or empty values - default to closed if not set
       if (!businessHours) {
-        return true; // Default to open if business hours not configured
+        return false; // Closed if business hours not configured
       }
 
       // Handle Prisma JSON type - it might be a string that needs parsing
@@ -102,33 +102,62 @@ export class CafesService {
         try {
           hours = JSON.parse(businessHours);
         } catch {
-          return true; // Default to open if parsing fails
+          return false; // Closed if parsing fails
         }
       }
 
       // Check if hours is an object (not null, not array, not primitive)
       if (typeof hours !== 'object' || hours === null || Array.isArray(hours)) {
-        return true; // Default to open if invalid format
+        return false; // Closed if invalid format
       }
 
       const now = new Date();
-      const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][now.getDay()];
+      const dayIndex = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayName = dayNames[dayIndex];
       const dayHours = hours[dayName];
 
-      if (!dayHours || typeof dayHours !== 'object' || !dayHours.enabled) {
-        return false; // Closed if day is not enabled
+      // If day is not configured or not enabled, cafe is closed
+      if (!dayHours || typeof dayHours !== 'object' || dayHours.enabled !== true) {
+        return false;
+      }
+
+      // Parse open and close times
+      if (!dayHours.open || !dayHours.close) {
+        return false; // Closed if times are missing
       }
 
       const currentTime = now.getHours() * 60 + now.getMinutes(); // minutes since midnight
-      const [openHour, openMin] = dayHours.open.split(':').map(Number);
-      const [closeHour, closeMin] = dayHours.close.split(':').map(Number);
-      const openTime = openHour * 60 + openMin;
-      const closeTime = closeHour * 60 + closeMin;
+      
+      // Parse time strings (format: "HH:MM" or "H:MM")
+      const parseTime = (timeStr: string): number => {
+        const parts = timeStr.split(':');
+        if (parts.length !== 2) {
+          throw new Error(`Invalid time format: ${timeStr}`);
+        }
+        const hour = parseInt(parts[0], 10);
+        const minute = parseInt(parts[1], 10);
+        if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+          throw new Error(`Invalid time values: ${timeStr}`);
+        }
+        return hour * 60 + minute;
+      };
 
-      return currentTime >= openTime && currentTime < closeTime;
+      const openTime = parseTime(dayHours.open);
+      const closeTime = parseTime(dayHours.close);
+
+      // Check if current time is within business hours
+      // Handle case where close time is next day (e.g., 22:00 to 02:00)
+      if (closeTime < openTime) {
+        // Business hours span midnight
+        return currentTime >= openTime || currentTime < closeTime;
+      } else {
+        // Normal business hours (same day)
+        return currentTime >= openTime && currentTime < closeTime;
+      }
     } catch (error) {
       console.error('Error calculating isCafeOpen:', error);
-      return true; // Default to open on error to avoid false negatives
+      return false; // Default to closed on error
     }
   }
 }

@@ -134,48 +134,8 @@ export const adminOrders: Order[] = [
   },
 ];
 
-export const reviews: Review[] = [
-  {
-    id: 'REV-1',
-    customerName: 'Sarah Johnson',
-    rating: 5,
-    comment: 'Amazing coffee! The espresso was perfectly brewed and the delivery was super fast.',
-    date: new Date(Date.now() - 3600000).toISOString(),
-    orderId: 'ORD-1005',
-  },
-  {
-    id: 'REV-2',
-    customerName: 'Michael Chen',
-    rating: 4,
-    comment: 'Great taste, but the delivery took a bit longer than expected. Overall good experience.',
-    date: new Date(Date.now() - 7200000).toISOString(),
-    orderId: 'ORD-1004',
-  },
-  {
-    id: 'REV-3',
-    customerName: 'Emily Davis',
-    rating: 5,
-    comment: 'Best coffee shop in the area! The caramel latte is to die for.',
-    date: new Date(Date.now() - 10800000).toISOString(),
-    orderId: 'ORD-1003',
-  },
-  {
-    id: 'REV-4',
-    customerName: 'David Kim',
-    rating: 3,
-    comment: 'Coffee was good but arrived a bit cold. Packaging could be better.',
-    date: new Date(Date.now() - 14400000).toISOString(),
-    orderId: 'ORD-1002',
-  },
-  {
-    id: 'REV-5',
-    customerName: 'Jessica Martinez',
-    rating: 5,
-    comment: 'Excellent service and quality! Will definitely order again.',
-    date: new Date(Date.now() - 18000000).toISOString(),
-    orderId: 'ORD-1001',
-  },
-];
+// Mock reviews removed - using real reviews from database
+export const reviews: Review[] = [];
 
 export const deliveryDrivers: DeliveryDriver[] = [
   {
