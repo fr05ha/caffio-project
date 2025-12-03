@@ -42,6 +42,7 @@ interface CafeDetail extends Cafe {
   phone?: string;
   email?: string;
   description?: string;
+  profileImageUrl?: string;
   isOpen?: boolean;
 }
 
@@ -413,11 +414,11 @@ export default function CoffeeShopDetail({
             showsHorizontalScrollIndicator={false}
             style={styles.photoScrollView}
           >
-            {/* Main cafe photo - using logoUrl or placeholder */}
+            {/* Main cafe photo - using profileImageUrl, logoUrl, or placeholder */}
             <View style={styles.photoContainer}>
               <Image
                 source={{
-                  uri: cafe.logoUrl || 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800',
+                  uri: cafe.profileImageUrl || cafe.logoUrl || cafe.imageUrl || 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800',
                 }}
                 style={styles.cafePhoto}
                 resizeMode="cover"

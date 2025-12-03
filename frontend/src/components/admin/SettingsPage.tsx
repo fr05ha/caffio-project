@@ -56,6 +56,7 @@ export function SettingsPage({ cafeId }: SettingsPageProps) {
   const [shopPhone, setShopPhone] = useState('');
   const [shopEmail, setShopEmail] = useState('');
   const [shopAddress, setShopAddress] = useState('');
+  const [profileImageUrl, setProfileImageUrl] = useState('');
   
   const [businessHours, setBusinessHours] = useState<BusinessHours>(() => {
     const defaultHours: BusinessHours = {} as BusinessHours;
@@ -88,6 +89,7 @@ export function SettingsPage({ cafeId }: SettingsPageProps) {
         setShopPhone(cafe.phone || '');
         setShopEmail(cafe.email || '');
         setShopAddress(cafe.address || '');
+        setProfileImageUrl(cafe.profileImageUrl || '');
         if (cafe.businessHours) {
           setBusinessHours(cafe.businessHours);
         }
@@ -128,6 +130,7 @@ export function SettingsPage({ cafeId }: SettingsPageProps) {
         phone: shopPhone,
         email: shopEmail,
         description: shopDescription,
+        profileImageUrl: profileImageUrl || undefined,
       });
       toast.success('Shop information updated successfully');
     } catch (error: any) {
@@ -222,6 +225,35 @@ export function SettingsPage({ cafeId }: SettingsPageProps) {
                   onChange={(e) => setShopName(e.target.value)}
                   className="mt-1"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="profile-image">Profile Picture URL</Label>
+                <div className="mt-1 space-y-2">
+                  <Input
+                    id="profile-image"
+                    value={profileImageUrl}
+                    onChange={(e) => setProfileImageUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    className="mt-1"
+                  />
+                  {profileImageUrl && (
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-600 mb-2">Preview:</p>
+                      <img
+                        src={profileImageUrl}
+                        alt="Profile preview"
+                        className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Enter a URL to an image that will be displayed as your cafe's profile picture in the mobile app
+                </p>
               </div>
 
               <div>

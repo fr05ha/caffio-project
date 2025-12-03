@@ -27,7 +27,7 @@
       "favicon": "./assets/caffio-logo.png"
     },
     "extra": {
-      "stripePublishableKey": "pk_test_your_publishable_key_here"
+      "stripePublishableKey": "pk_test_51SZrsQISl9AvMjv2e34mTYy0HaxZHS5XMbG7bbsjO5KBJjbnSZ7C7K1sG2clnjAzUn2Jhlt6czGYczfGbZkoCzvo00TJBCbXEh"
     }
   }
 }

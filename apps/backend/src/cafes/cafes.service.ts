@@ -68,6 +68,7 @@ export class CafesService {
     logoUrl?: string;
     theme?: string;
     businessHours?: any;
+    profileImageUrl?: string;
   }) {
     return this.db.cafe.update({
       where: { id },
@@ -83,6 +84,7 @@ export class CafesService {
         ...(data.logoUrl !== undefined && { logoUrl: data.logoUrl }),
         ...(data.theme !== undefined && { theme: data.theme }),
         ...(data.businessHours !== undefined && { businessHours: data.businessHours }),
+        ...(data.profileImageUrl !== undefined && { profileImageUrl: data.profileImageUrl }),
       },
     });
   }

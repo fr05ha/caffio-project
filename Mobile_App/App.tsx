@@ -126,6 +126,7 @@ export default function App() {
         description: cafe.description || `Rated by ${cafe.ratingCount} customers`,
         priceRange: '$$',
           image:
+            cafe.profileImageUrl ||
             cafe.imageUrl ||
             'https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&w=800&q=80',
         };

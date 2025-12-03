@@ -40,6 +40,7 @@ export type Cafe = {
   secondaryColor?: string | null;
   accentColor?: string | null;
   logoUrl?: string | null;
+  profileImageUrl?: string | null;
   theme?: string | null;
   phone?: string | null;
   email?: string | null;
@@ -124,6 +125,7 @@ export const api = {
     secondaryColor?: string;
     accentColor?: string;
     logoUrl?: string;
+    profileImageUrl?: string;
     theme?: string;
     businessHours?: BusinessHours;
   }): Promise<Cafe> {

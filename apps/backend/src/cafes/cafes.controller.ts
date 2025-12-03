@@ -52,6 +52,7 @@ export class CafesController {
         logoUrl: { type: 'string' },
         theme: { type: 'string' },
         businessHours: { type: 'object' },
+        profileImageUrl: { type: 'string' },
       },
     },
   })
@@ -70,6 +71,7 @@ export class CafesController {
       logoUrl?: string;
       theme?: string;
       businessHours?: any;
+      profileImageUrl?: string;
     },
   ) {
     return this.cafesService.update(id, data);

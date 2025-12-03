@@ -26,6 +26,7 @@ model Cafe {
   email          String?
   description    String?
   businessHours  Json?
+  profileImageUrl String?
   favoritedBy    CustomerFavoriteCafe[]
   menus          Menu[]
   reviews        Review[]

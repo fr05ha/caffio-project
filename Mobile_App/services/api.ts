@@ -23,6 +23,7 @@ export interface Cafe {
   createdAt: string;
   logoUrl?: string;
   imageUrl?: string;
+  profileImageUrl?: string;
   primaryColor?: string;
   secondaryColor?: string;
   accentColor?: string;
