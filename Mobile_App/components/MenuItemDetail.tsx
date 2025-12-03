@@ -73,6 +73,12 @@ const ICE_OPTIONS: (CustomizationOption & { icon: string })[] = [
   { id: 'extra', name: 'Extra Ice', price: 0, icon: 'snow' },
 ];
 
+const TOPPINGS_OPTIONS: (CustomizationOption & { icon: string })[] = [
+  { id: 'chocolate', name: 'Chocolate', price: 0.5, icon: 'cube' },
+  { id: 'caramel', name: 'Caramel', price: 0.5, icon: 'water' },
+  { id: 'vanilla', name: 'Vanilla', price: 0.5, icon: 'flower' },
+];
+
 export default function MenuItemDetail({
   item,
   cafeName,
@@ -108,6 +114,9 @@ export default function MenuItemDetail({
       }
       if (item.customizations.ice) {
         result.ice = item.customizations.ice.default || item.customizations.ice.options[0] || 'normal';
+      }
+      if (item.customizations.toppings) {
+        result.toppings = item.customizations.toppings.default || item.customizations.toppings.options[0] || 'none';
       }
       return result;
     }
@@ -197,6 +206,24 @@ export default function MenuItemDetail({
             };
           }),
           selected: customizations.ice,
+        });
+      }
+      
+      if (item.customizations.toppings) {
+        groups.push({
+          id: 'toppings',
+          title: 'Toppings',
+          required: false,
+          options: item.customizations.toppings.options.map((opt: string) => {
+            const defaultOption = TOPPINGS_OPTIONS.find(t => t.name.toLowerCase().includes(opt.toLowerCase()));
+            return {
+              id: opt.toLowerCase().replace(/\s+/g, '_'),
+              name: opt,
+              price: defaultOption?.price || 0,
+              icon: defaultOption?.icon || 'cube',
+            };
+          }),
+          selected: customizations.toppings,
         });
       }
     } else {

@@ -549,26 +549,6 @@ export default function CoffeeShopDetail({
             </View>
           )}
 
-          {/* Open/Closed Status */}
-          <View style={styles.statusRow}>
-            {(() => {
-              const isOpen = cafe.isOpen === true;
-              return (
-                <>
-                  <View style={[styles.statusDot, { backgroundColor: isOpen ? '#4CAF50' : '#F44336' }]} />
-                  <Ionicons 
-                    name={isOpen ? 'time' : 'time-outline'} 
-                    size={16} 
-                    color={isOpen ? '#4CAF50' : '#F44336'} 
-                    style={styles.statusIcon}
-                  />
-                  <Text style={[styles.statusText, { color: isOpen ? '#4CAF50' : '#F44336' }]}>
-                    {isOpen ? 'Open now' : 'Closed'}
-                  </Text>
-                </>
-              );
-            })()}
-          </View>
 
           {cafe.description && (
             <Text style={styles.descriptionText}>{cafe.description}</Text>
@@ -609,13 +589,42 @@ export default function CoffeeShopDetail({
               </View>
             ) : (
               <>
-                {cafe.menus.map(renderMenuSection)}
+                {/* Category Filter */}
+                {menuCategories.length > 1 && (
+                  <View style={styles.categoryFilterContainer}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScrollView}>
+                      {menuCategories.map((category) => (
+                        <TouchableOpacity
+                          key={category}
+                          style={[
+                            styles.categoryChip,
+                            selectedCategory === category && styles.categoryChipActive,
+                          ]}
+                          onPress={() => setSelectedCategory(category)}
+                        >
+                          <Text
+                            style={[
+                              styles.categoryChipText,
+                              selectedCategory === category && styles.categoryChipTextActive,
+                            ]}
+                          >
+                            {category}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
                 
-                {/* All Items View (Uber Eats style) */}
-                {allMenuItems.length > 0 && (
+                {/* Menu Items Grouped by Category */}
+                {visibleMenuItems.length > 0 ? (
                   <View style={styles.allItemsSection}>
-                    <Text style={styles.allItemsTitle}>All Items</Text>
-                    {allMenuItems.map(renderMenuItem)}
+                    {visibleMenuItems.map(renderMenuItem)}
+                  </View>
+                ) : (
+                  <View style={styles.emptyMenu}>
+                    <Ionicons name="restaurant-outline" size={48} color="#BDBDBD" />
+                    <Text style={styles.emptyMenuText}>No items in this category</Text>
                   </View>
                 )}
               </>
@@ -687,32 +696,6 @@ export default function CoffeeShopDetail({
           <View style={styles.infoContainer}>
             <Text style={styles.infoTitle}>Information</Text>
             
-            {/* Current Status */}
-            <View style={styles.infoSection}>
-              <View style={styles.infoSectionHeader}>
-                <Ionicons name="time-outline" size={20} color="#5D4037" />
-                <Text style={styles.infoSectionTitle}>Status</Text>
-              </View>
-              <View style={styles.statusRow}>
-                {(() => {
-                  const isOpen = cafe.isOpen === true;
-                  return (
-                    <>
-                      <View style={[styles.statusDot, { backgroundColor: isOpen ? '#4CAF50' : '#F44336' }]} />
-                      <Ionicons 
-                        name={isOpen ? 'time' : 'time-outline'} 
-                        size={16} 
-                        color={isOpen ? '#4CAF50' : '#F44336'} 
-                        style={styles.statusIcon}
-                      />
-                      <Text style={[styles.statusText, { color: isOpen ? '#4CAF50' : '#F44336' }]}>
-                        {isOpen ? 'Open now' : 'Closed'}
-                      </Text>
-                    </>
-                  );
-                })()}
-              </View>
-            </View>
             
             {/* Business Hours */}
             {cafe.businessHours && (
@@ -1581,6 +1564,34 @@ const styles = StyleSheet.create({
     color: '#5D4037',
   },
   orderTypeTextActive: {
+    color: '#FFFFFF',
+  },
+  categoryFilterContainer: {
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  categoryScrollView: {
+    marginHorizontal: -4,
+  },
+  categoryChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#F5F5F5',
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  categoryChipActive: {
+    backgroundColor: '#5D4037',
+    borderColor: '#5D4037',
+  },
+  categoryChipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#8D6E63',
+  },
+  categoryChipTextActive: {
     color: '#FFFFFF',
   },
 });

@@ -40,6 +40,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
       milk: { options: ['Whole', 'Skim', 'Oat', 'Almond', 'Soy'], default: 'Whole', enabled: false },
       sugar: { options: ['None', '1', '2', '3', 'Extra'], default: 'None', enabled: false },
       ice: { options: ['None', 'Light', 'Regular', 'Extra'], default: 'Regular', enabled: false },
+      toppings: { options: ['Chocolate', 'Caramel', 'Vanilla'], default: 'None', enabled: false },
     },
   });
 
@@ -82,6 +83,12 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
         default: formData.customizations.ice.default,
       };
     }
+    if (formData.customizations.toppings.enabled) {
+      customizations.toppings = {
+        options: formData.customizations.toppings.options,
+        default: formData.customizations.toppings.default,
+      };
+    }
 
     const itemData = {
       name: formData.name,
@@ -115,6 +122,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
         milk: { options: ['Whole', 'Skim', 'Oat', 'Almond', 'Soy'], default: 'Whole', enabled: false },
         sugar: { options: ['None', '1', '2', '3', 'Extra'], default: 'None', enabled: false },
         ice: { options: ['None', 'Light', 'Regular', 'Extra'], default: 'Regular', enabled: false },
+        toppings: { options: ['Chocolate', 'Caramel', 'Vanilla'], default: 'None', enabled: false },
       },
     });
   };
@@ -149,6 +157,11 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
           options: customizations.ice?.options || ['None', 'Light', 'Regular', 'Extra'],
           default: customizations.ice?.default || 'Regular',
           enabled: !!customizations.ice,
+        },
+        toppings: {
+          options: customizations.toppings?.options || ['Chocolate', 'Caramel', 'Vanilla'],
+          default: customizations.toppings?.default || 'None',
+          enabled: !!customizations.toppings,
         },
       },
     });
@@ -499,6 +512,66 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                         </SelectTrigger>
                         <SelectContent>
                           {formData.customizations.ice.options.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Toppings */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.customizations.toppings.enabled}
+                      onCheckedChange={(checked: boolean) => setFormData({
+                        ...formData,
+                        customizations: {
+                          ...formData.customizations,
+                          toppings: { ...formData.customizations.toppings, enabled: checked },
+                        },
+                      })}
+                    />
+                    <Label>Toppings Options</Label>
+                  </div>
+                  {formData.customizations.toppings.enabled && (
+                    <div className="ml-8 space-y-2">
+                      <div className="flex gap-2 flex-wrap">
+                        {formData.customizations.toppings.options.map((opt, idx) => (
+                          <Input
+                            key={idx}
+                            value={opt}
+                            onChange={(e) => {
+                              const newOptions = [...formData.customizations.toppings.options];
+                              newOptions[idx] = e.target.value;
+                              setFormData({
+                                ...formData,
+                                customizations: {
+                                  ...formData.customizations,
+                                  toppings: { ...formData.customizations.toppings, options: newOptions },
+                                },
+                              });
+                            }}
+                            className="w-24"
+                          />
+                        ))}
+                      </div>
+                      <Select
+                        value={formData.customizations.toppings.default}
+                        onValueChange={(value: string) => setFormData({
+                          ...formData,
+                          customizations: {
+                            ...formData.customizations,
+                            toppings: { ...formData.customizations.toppings, default: value },
+                          },
+                        })}
+                      >
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Default topping" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {formData.customizations.toppings.options.map((opt) => (
                             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                           ))}
                         </SelectContent>
@@ -896,6 +969,66 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                                 </SelectTrigger>
                                 <SelectContent>
                                   {formData.customizations.ice.options.map((opt) => (
+                                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Toppings */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={formData.customizations.toppings.enabled}
+                              onCheckedChange={(checked: boolean) => setFormData({
+                                ...formData,
+                                customizations: {
+                                  ...formData.customizations,
+                                  toppings: { ...formData.customizations.toppings, enabled: checked },
+                                },
+                              })}
+                            />
+                            <Label>Toppings Options</Label>
+                          </div>
+                          {formData.customizations.toppings.enabled && (
+                            <div className="ml-8 space-y-2">
+                              <div className="flex gap-2 flex-wrap">
+                                {formData.customizations.toppings.options.map((opt, idx) => (
+                                  <Input
+                                    key={idx}
+                                    value={opt}
+                                    onChange={(e) => {
+                                      const newOptions = [...formData.customizations.toppings.options];
+                                      newOptions[idx] = e.target.value;
+                                      setFormData({
+                                        ...formData,
+                                        customizations: {
+                                          ...formData.customizations,
+                                          toppings: { ...formData.customizations.toppings, options: newOptions },
+                                        },
+                                      });
+                                    }}
+                                    className="w-24"
+                                  />
+                                ))}
+                              </div>
+                              <Select
+                                value={formData.customizations.toppings.default}
+                                onValueChange={(value: string) => setFormData({
+                                  ...formData,
+                                  customizations: {
+                                    ...formData.customizations,
+                                    toppings: { ...formData.customizations.toppings, default: value },
+                                  },
+                                })}
+                              >
+                                <SelectTrigger className="w-48">
+                                  <SelectValue placeholder="Default topping" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {formData.customizations.toppings.options.map((opt) => (
                                     <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                                   ))}
                                 </SelectContent>

@@ -245,23 +245,6 @@ export default function App() {
           />
           <View style={styles.cardHeader}>
             <View style={styles.statusContainer}>
-              {(() => {
-                const isOpen = item.isOpen === true;
-                return (
-                  <>
-                    <View style={[styles.statusDot, { backgroundColor: isOpen ? '#4CAF50' : '#F44336' }]} />
-                    <Ionicons 
-                      name={isOpen ? 'time' : 'time-outline'} 
-                      size={14} 
-                      color={isOpen ? '#4CAF50' : '#F44336'} 
-                      style={styles.statusIcon}
-                    />
-                    <Text style={[styles.statusText, { color: isOpen ? '#4CAF50' : '#F44336' }]}>
-                      {isOpen ? 'Open now' : 'Closed'}
-                    </Text>
-                  </>
-                );
-              })()}
               {item.isCertified && (
                 <View style={styles.certifiedBadge}>
                   <Ionicons name="checkmark-circle" size={12} color="#4CAF50" />
