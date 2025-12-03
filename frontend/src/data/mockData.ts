@@ -5,7 +5,7 @@ export const coffeeShops: CoffeeShop[] = [
     id: '1',
     name: 'Brew & Bean',
     description: 'Artisan coffee and fresh pastries',
-    rating: 4.8,
+    rating: 0, // No mock ratings - all ratings come from real users
     deliveryTime: '15-25 min',
     deliveryFee: 2.99,
     image: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2ZmZWUlMjBzaG9wJTIwaW50ZXJpb3J8ZW58MXx8fHwxNzYwODM0MjU4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
@@ -15,7 +15,7 @@ export const coffeeShops: CoffeeShop[] = [
     id: '2',
     name: 'The Daily Grind',
     description: 'Premium coffee roasted daily',
-    rating: 4.6,
+    rating: 0, // No mock ratings - all ratings come from real users
     deliveryTime: '20-30 min',
     deliveryFee: 3.49,
     image: 'https://images.unsplash.com/photo-1611653682092-d881246b72a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBjYWZlfGVufDF8fHx8MTc2MDc5NjA4Nnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
@@ -25,7 +25,7 @@ export const coffeeShops: CoffeeShop[] = [
     id: '3',
     name: 'Espresso Express',
     description: 'Quick service, great taste',
-    rating: 4.7,
+    rating: 0, // No mock ratings - all ratings come from real users
     deliveryTime: '10-20 min',
     deliveryFee: 1.99,
     image: 'https://images.unsplash.com/photo-1726678640183-2b64ed27ffdf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYWZlJTIwc3RvcmVmcm9udHxlbnwxfHx8fDE3NjA3NDg3NTB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',

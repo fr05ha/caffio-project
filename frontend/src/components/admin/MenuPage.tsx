@@ -176,11 +176,12 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
               Add Menu Item
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle>Add New Menu Item</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="overflow-y-auto flex-1 pr-2 -mr-2">
+              <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Name *</Label>
@@ -500,13 +501,14 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                 <Label htmlFor="available">Available for order</Label>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 pt-2">
                 <Button type="submit" className="flex-1">Add Item</Button>
                 <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                   Cancel
                 </Button>
               </div>
-            </form>
+              </form>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
@@ -559,11 +561,12 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                       Edit
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
                     <DialogHeader>
                       <DialogTitle>Edit Menu Item</DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="overflow-y-auto flex-1 pr-2 -mr-2">
+                      <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="edit-name">Name *</Label>
@@ -878,13 +881,14 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                         <Label htmlFor="edit-available">Available for order</Label>
                       </div>
 
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 pt-2">
                         <Button type="submit" className="flex-1">Save Changes</Button>
                         <Button type="button" variant="outline" onClick={() => setEditingItem(null)}>
                           Cancel
                         </Button>
                       </div>
-                    </form>
+                      </form>
+                    </div>
                   </DialogContent>
                 </Dialog>
                 <Button

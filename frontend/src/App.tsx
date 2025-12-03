@@ -102,7 +102,11 @@ export default function App() {
 
         // Load reviews for cafe
         const reviewsData = await api.getReviewsByCafe(selectedCafeId);
-        const mappedReviews: Review[] = reviewsData.map((review) => ({
+        // Remove duplicates by id
+        const uniqueReviews = Array.from(
+          new Map(reviewsData.map((review) => [review.id, review])).values()
+        );
+        const mappedReviews: Review[] = uniqueReviews.map((review) => ({
           id: String(review.id),
           customerName: review.customerName || review.customer?.name || 'Anonymous',
           rating: review.rating,

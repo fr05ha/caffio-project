@@ -113,20 +113,29 @@ export class CafesService {
         return true; // Open by default if invalid format
       }
 
+      // Check if businessHours object is empty (no days configured)
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const hasAnyDay = dayNames.some(day => hours[day] && typeof hours[day] === 'object');
+      if (!hasAnyDay) {
+        return true; // Open by default if no days are configured
+      }
+
       const now = new Date();
       const dayIndex = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
       const dayName = dayNames[dayIndex];
       const dayHours = hours[dayName];
 
-      // If day is not configured or not enabled, cafe is closed
+      // If day is not configured, check if any other day is configured
+      // If no days are configured at all, default to open
       if (!dayHours || typeof dayHours !== 'object') {
-        return false; // Closed if day not configured
+        // If this specific day is not configured, but other days are, assume closed for this day
+        // But if no days are configured at all, default to open
+        return !hasAnyDay; // Return true only if no days are configured at all
       }
 
       // Check if day is enabled
       if (dayHours.enabled !== true && dayHours.enabled !== 'true') {
-        return false; // Closed if day is disabled
+        return false; // Closed if day is explicitly disabled
       }
 
       // Parse open and close times

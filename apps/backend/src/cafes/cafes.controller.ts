@@ -20,9 +20,10 @@ export class CafesController {
     // Add isOpen status to each cafe
     return cafes.map(cafe => {
       const isOpen = this.cafesService.isCafeOpen(cafe.businessHours as any);
+      // Ensure isOpen is always a boolean
       return {
         ...cafe,
-        isOpen,
+        isOpen: Boolean(isOpen),
       };
     });
   }
@@ -34,7 +35,8 @@ export class CafesController {
     if (cafe) {
       // Add isOpen status based on business hours
       const isOpen = this.cafesService.isCafeOpen(cafe.businessHours as any);
-      return { ...cafe, isOpen };
+      // Ensure isOpen is always a boolean
+      return { ...cafe, isOpen: Boolean(isOpen) };
     }
     return cafe;
   }

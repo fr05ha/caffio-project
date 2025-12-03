@@ -115,6 +115,12 @@ export default function CoffeeShopDetail({
       setLoading(true);
       setError(null);
       const cafeData = await apiService.getCafeById(cafeId);
+      // Remove duplicate reviews by id
+      if (cafeData.reviews && Array.isArray(cafeData.reviews)) {
+        cafeData.reviews = Array.from(
+          new Map(cafeData.reviews.map((review: any) => [review.id, review])).values()
+        );
+      }
       setCafe(cafeData as CafeDetail);
       setSelectedCategory('All');
       setCart({});
@@ -625,8 +631,11 @@ export default function CoffeeShopDetail({
               )}
             </View>
             {cafe.reviews && cafe.reviews.length > 0 ? (
-              cafe.reviews.map((review: any, index: number) => (
-                <View key={index} style={styles.reviewItem}>
+              // Remove duplicates by id
+              Array.from(
+                new Map(cafe.reviews.map((review: any) => [review.id, review])).values()
+              ).map((review: any) => (
+                <View key={review.id} style={styles.reviewItem}>
                   <View style={styles.reviewHeader}>
                     <View style={styles.reviewUserInfo}>
                       <Text style={styles.reviewUserName}>
@@ -670,6 +679,33 @@ export default function CoffeeShopDetail({
         {activeTab === 'info' && (
           <View style={styles.infoContainer}>
             <Text style={styles.infoTitle}>Information</Text>
+            
+            {/* Current Status */}
+            <View style={styles.infoSection}>
+              <View style={styles.infoSectionHeader}>
+                <Ionicons name="time-outline" size={20} color="#5D4037" />
+                <Text style={styles.infoSectionTitle}>Status</Text>
+              </View>
+              <View style={styles.statusRow}>
+                {(() => {
+                  const isOpen = cafe.isOpen === true;
+                  return (
+                    <>
+                      <View style={[styles.statusDot, { backgroundColor: isOpen ? '#4CAF50' : '#F44336' }]} />
+                      <Ionicons 
+                        name={isOpen ? 'time' : 'time-outline'} 
+                        size={16} 
+                        color={isOpen ? '#4CAF50' : '#F44336'} 
+                        style={styles.statusIcon}
+                      />
+                      <Text style={[styles.statusText, { color: isOpen ? '#4CAF50' : '#F44336' }]}>
+                        {isOpen ? 'Open now' : 'Closed'}
+                      </Text>
+                    </>
+                  );
+                })()}
+              </View>
+            </View>
             
             {/* Business Hours */}
             {cafe.businessHours && (

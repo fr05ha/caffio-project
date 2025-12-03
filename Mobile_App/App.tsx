@@ -48,7 +48,7 @@ const DUMMY_SHOPS: CoffeeShop[] = [
     name: 'Bean There',
     distance: '200m',
     address: '123 Main St',
-    rating: 4.7,
+    rating: 0, // No mock ratings - all ratings come from real users
     description: 'Artisanal coffee with locally sourced beans',
     priceRange: '$$',
     isOpen: true,
@@ -59,7 +59,7 @@ const DUMMY_SHOPS: CoffeeShop[] = [
     name: 'Brew Crew',
     distance: '450m',
     address: '456 Oak Ave',
-    rating: 4.5,
+    rating: 0, // No mock ratings - all ratings come from real users
     description: 'Cozy atmosphere with specialty drinks',
     priceRange: '$',
     isOpen: true,
