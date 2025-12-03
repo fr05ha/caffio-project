@@ -7,7 +7,7 @@ import { MenuPage } from './components/admin/MenuPage';
 import { ReviewsPage } from './components/admin/ReviewsPage';
 import { DeliveryPage } from './components/admin/DeliveryPage';
 import { SettingsPage } from './components/admin/SettingsPage';
-import { adminOrders, deliveryDrivers } from './data/adminMockData';
+import { deliveryDrivers } from './data/adminMockData';
 import { menuItems as customerMenuItems } from './data/mockData';
 import { api, Cafe } from './services/api';
 import { Order, MenuItem, Review } from './types';
@@ -15,6 +15,8 @@ import { toast, Toaster } from 'sonner';
 import { useTheme } from './hooks/useTheme';
 
 type Page = 'dashboard' | 'orders' | 'menu' | 'reviews' | 'delivery' | 'settings';
+
+const AUTH_STORAGE_KEY = 'caffio_admin_auth';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -29,9 +31,44 @@ export default function App() {
   const [selectedMenuId, setSelectedMenuId] = useState<number | null>(null);
   const [selectedCafeId, setSelectedCafeId] = useState<number | null>(null);
   const [currentCafe, setCurrentCafe] = useState<Cafe | null>(null);
+  const [isRestoringSession, setIsRestoringSession] = useState(true);
 
   // Apply theme based on cafe
   useTheme(currentCafe);
+
+  // Restore session from localStorage on mount
+  useEffect(() => {
+    async function restoreSession() {
+      try {
+        const storedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (storedAuth) {
+          const authData = JSON.parse(storedAuth);
+          const { cafe } = authData;
+          
+          if (cafe && cafe.id) {
+            // Verify the cafe still exists by fetching it
+            try {
+              const verifiedCafe = await api.getCafe(cafe.id);
+              // Restore session
+              setCurrentCafe(verifiedCafe);
+              setSelectedCafeId(verifiedCafe.id);
+              setIsLoggedIn(true);
+            } catch (error) {
+              // Cafe might not exist anymore, clear storage
+              localStorage.removeItem(AUTH_STORAGE_KEY);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error restoring session:', error);
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+      } finally {
+        setIsRestoringSession(false);
+      }
+    }
+    
+    restoreSession();
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -133,6 +170,8 @@ export default function App() {
     setCurrentCafe(cafe);
     setSelectedCafeId(cafe.id);
     setIsLoggedIn(true);
+    // Save to localStorage for session persistence
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ cafe }));
   };
 
   const handleLogout = () => {
@@ -143,6 +182,8 @@ export default function App() {
     setMenuItems([]); // Clear menu items on logout
     setBackendAverageRating(0);
     setCurrentPage('dashboard');
+    // Clear localStorage on logout
+    localStorage.removeItem(AUTH_STORAGE_KEY);
     toast.info('Logged out successfully');
   };
 
@@ -249,6 +290,18 @@ export default function App() {
           ? reviewsList.reduce((sum: number, review: Review) => sum + review.rating, 0) / reviewsList.length
           : 0);
   }, [backendAverageRating, reviewsList]);
+  // Show loading state while restoring session
+  if (isRestoringSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Toaster position="top-right" />

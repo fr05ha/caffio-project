@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import { Button } from '../ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -69,16 +68,6 @@ export function DashboardLayout({ children, currentPage, onPageChange, onLogout,
         </nav>
 
         <div className="p-4 border-t">
-          <div className="flex items-center gap-3 mb-4">
-            <Avatar>
-              <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" />
-              <AvatarFallback>AD</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm truncate">Admin User</p>
-              <p className="text-xs text-gray-600 truncate">admin@brew.com</p>
-            </div>
-          </div>
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50"

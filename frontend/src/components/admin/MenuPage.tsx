@@ -176,11 +176,27 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
               Add Menu Item
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] !flex !flex-col !grid-cols-none overflow-hidden p-0">
+          <DialogContent 
+            className="max-w-2xl !flex !flex-col !grid-cols-none overflow-hidden p-0" 
+            style={{ 
+              maxHeight: '90vh',
+              height: '90vh',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 border-b">
               <DialogTitle>Add New Menu Item</DialogTitle>
             </DialogHeader>
-            <div className="overflow-y-auto flex-1 min-h-0 px-6 py-4">
+            <div 
+              className="overflow-y-auto flex-1 min-h-0 px-6 py-4" 
+              style={{ 
+                overflowY: 'auto',
+                flex: '1 1 0',
+                minHeight: 0,
+                maxHeight: 'calc(90vh - 140px)'
+              }}
+            >
               <form onSubmit={handleSubmit} id="add-menu-item-form" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -255,7 +271,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={formData.customizations.size.enabled}
-                      onCheckedChange={(checked) => setFormData({
+                      onCheckedChange={(checked: boolean) => setFormData({
                         ...formData,
                         customizations: {
                           ...formData.customizations,
@@ -290,7 +306,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                       </div>
                       <Select
                         value={formData.customizations.size.default}
-                        onValueChange={(value) => setFormData({
+                        onValueChange={(value: string) => setFormData({
                           ...formData,
                           customizations: {
                             ...formData.customizations,
@@ -316,7 +332,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={formData.customizations.milk.enabled}
-                      onCheckedChange={(checked) => setFormData({
+                      onCheckedChange={(checked: boolean) => setFormData({
                         ...formData,
                         customizations: {
                           ...formData.customizations,
@@ -350,7 +366,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                       </div>
                       <Select
                         value={formData.customizations.milk.default}
-                        onValueChange={(value) => setFormData({
+                        onValueChange={(value: string) => setFormData({
                           ...formData,
                           customizations: {
                             ...formData.customizations,
@@ -376,7 +392,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={formData.customizations.sugar.enabled}
-                      onCheckedChange={(checked) => setFormData({
+                      onCheckedChange={(checked: boolean) => setFormData({
                         ...formData,
                         customizations: {
                           ...formData.customizations,
@@ -410,7 +426,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                       </div>
                       <Select
                         value={formData.customizations.sugar.default}
-                        onValueChange={(value) => setFormData({
+                        onValueChange={(value: string) => setFormData({
                           ...formData,
                           customizations: {
                             ...formData.customizations,
@@ -436,7 +452,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={formData.customizations.ice.enabled}
-                      onCheckedChange={(checked) => setFormData({
+                      onCheckedChange={(checked: boolean) => setFormData({
                         ...formData,
                         customizations: {
                           ...formData.customizations,
@@ -470,7 +486,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                       </div>
                       <Select
                         value={formData.customizations.ice.default}
-                        onValueChange={(value) => setFormData({
+                        onValueChange={(value: string) => setFormData({
                           ...formData,
                           customizations: {
                             ...formData.customizations,
@@ -562,11 +578,27 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                       Edit
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] !flex !flex-col !grid-cols-none overflow-hidden p-0">
+                  <DialogContent 
+                    className="max-w-2xl !flex !flex-col !grid-cols-none overflow-hidden p-0" 
+                    style={{ 
+                      maxHeight: '90vh',
+                      height: '90vh',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}
+                  >
                     <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 border-b">
                       <DialogTitle>Edit Menu Item</DialogTitle>
                     </DialogHeader>
-                    <div className="overflow-y-auto flex-1 min-h-0 px-6 py-4">
+                    <div 
+                      className="overflow-y-auto flex-1 min-h-0 px-6 py-4" 
+                      style={{ 
+                        overflowY: 'auto',
+                        flex: '1 1 0',
+                        minHeight: 0,
+                        maxHeight: 'calc(90vh - 140px)'
+                      }}
+                    >
                       <form onSubmit={handleSubmit} id="edit-menu-item-form" className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -637,7 +669,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                           <div className="flex items-center gap-2">
                             <Switch
                               checked={formData.customizations.size.enabled}
-                              onCheckedChange={(checked) => setFormData({
+                              onCheckedChange={(checked: boolean) => setFormData({
                                 ...formData,
                                 customizations: {
                                   ...formData.customizations,
@@ -671,7 +703,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                               </div>
                               <Select
                                 value={formData.customizations.size.default}
-                                onValueChange={(value) => setFormData({
+                                onValueChange={(value: string) => setFormData({
                                   ...formData,
                                   customizations: {
                                     ...formData.customizations,
@@ -697,7 +729,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                           <div className="flex items-center gap-2">
                             <Switch
                               checked={formData.customizations.milk.enabled}
-                              onCheckedChange={(checked) => setFormData({
+                              onCheckedChange={(checked: boolean) => setFormData({
                                 ...formData,
                                 customizations: {
                                   ...formData.customizations,
@@ -731,7 +763,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                               </div>
                               <Select
                                 value={formData.customizations.milk.default}
-                                onValueChange={(value) => setFormData({
+                                onValueChange={(value: string) => setFormData({
                                   ...formData,
                                   customizations: {
                                     ...formData.customizations,
@@ -757,7 +789,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                           <div className="flex items-center gap-2">
                             <Switch
                               checked={formData.customizations.sugar.enabled}
-                              onCheckedChange={(checked) => setFormData({
+                              onCheckedChange={(checked: boolean) => setFormData({
                                 ...formData,
                                 customizations: {
                                   ...formData.customizations,
@@ -791,7 +823,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                               </div>
                               <Select
                                 value={formData.customizations.sugar.default}
-                                onValueChange={(value) => setFormData({
+                                onValueChange={(value: string) => setFormData({
                                   ...formData,
                                   customizations: {
                                     ...formData.customizations,
@@ -817,7 +849,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                           <div className="flex items-center gap-2">
                             <Switch
                               checked={formData.customizations.ice.enabled}
-                              onCheckedChange={(checked) => setFormData({
+                              onCheckedChange={(checked: boolean) => setFormData({
                                 ...formData,
                                 customizations: {
                                   ...formData.customizations,
@@ -851,7 +883,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                               </div>
                               <Select
                                 value={formData.customizations.ice.default}
-                                onValueChange={(value) => setFormData({
+                                onValueChange={(value: string) => setFormData({
                                   ...formData,
                                   customizations: {
                                     ...formData.customizations,
