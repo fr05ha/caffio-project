@@ -13,20 +13,6 @@
 
 </div>
 
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [API Documentation](#api-documentation)
-- [Deployment](#deployment)
-- [Environment Variables](#environment-variables)
-- [Contributing](#contributing)
-- [License](#license)
-
 ## 🎯 Overview
 
 Caffio is a full-stack coffee shop management platform that enables cafe owners to manage their business operations while providing customers with a seamless mobile ordering experience. The platform consists of three main components:
@@ -169,58 +155,6 @@ Caffio is a full-stack coffee shop management platform that enables cafe owners 
    # Or for Android:
    npm run android
    ```
-
-
-## 🌐 Deployment
-
-### Backend & Database (Render)
-
-1. Create a PostgreSQL database on Render
-2. Create a new Web Service
-3. Connect your GitHub repository
-4. Configure environment variables:
-   - `DATABASE_URL` - Render PostgreSQL connection string
-   - `JWT_SECRET` - Your JWT secret key
-   - `PORT` - 3000 (or Render's assigned port)
-   - `CORS_ORIGIN` - Your frontend URL
-   - `STRIPE_SECRET_KEY` - Your Stripe secret key (optional)
-
-5. Set Build Command:
-   ```bash
-   cd apps/backend && npm install && npx prisma generate && npm run build
-   ```
-
-6. Set Start Command:
-   ```bash
-   cd apps/backend && npx prisma migrate deploy && npm run start
-   ```
-
-### Frontend (Vercel)
-
-1. Import your GitHub repository to Vercel
-2. Set Root Directory to `frontend`
-3. Configure environment variables:
-   - `VITE_API_BASE_URL` - Your backend API URL
-
-4. Deploy
-
-### Mobile App
-
-The mobile app can be built using Expo:
-
-```bash
-cd Mobile_App
-npm install
-expo build:ios    # For iOS
-expo build:android # For Android
-```
-
-Or use EAS Build:
-```bash
-npm install -g eas-cli
-eas build --platform ios
-eas build --platform android
-```
 
 
 ## 🙏 Acknowledgments
