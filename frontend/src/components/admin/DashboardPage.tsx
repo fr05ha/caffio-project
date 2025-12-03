@@ -23,11 +23,16 @@ export function DashboardPage({ orders, averageRating }: DashboardPageProps) {
 
   // Calculate real weekly data from orders (last 7 days)
   const weekData = (() => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekData = [];
     
-    return days.map((day, index) => {
+    // Get last 7 days starting from today going backwards
+    for (let i = 6; i >= 0; i--) {
       const dayDate = new Date();
-      dayDate.setDate(dayDate.getDate() - (6 - index));
+      dayDate.setDate(dayDate.getDate() - i);
+      const dayOfWeek = dayDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const dayName = dayNames[dayOfWeek];
+      
       const dayStart = new Date(dayDate);
       dayStart.setHours(0, 0, 0, 0);
       const dayEnd = new Date(dayDate);
@@ -38,12 +43,14 @@ export function DashboardPage({ orders, averageRating }: DashboardPageProps) {
         return orderDate >= dayStart && orderDate <= dayEnd;
       });
       
-      return {
-        day,
+      weekData.push({
+        day: dayName,
         orders: dayOrders.length,
         revenue: dayOrders.reduce((sum, order) => sum + order.total, 0),
-      };
-    });
+      });
+    }
+    
+    return weekData;
   })();
 
   const recentOrders = orders.slice(0, 5);

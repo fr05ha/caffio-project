@@ -177,11 +177,11 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] !flex !flex-col !grid-cols-none overflow-hidden p-0">
-            <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0">
+            <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 border-b">
               <DialogTitle>Add New Menu Item</DialogTitle>
             </DialogHeader>
-            <div className="overflow-y-auto flex-1 px-6 min-h-0">
-              <form onSubmit={handleSubmit} id="add-menu-item-form" className="space-y-4 pb-4">
+            <div className="overflow-y-auto flex-1 min-h-0 px-6 py-4">
+              <form onSubmit={handleSubmit} id="add-menu-item-form" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Name *</Label>
@@ -500,16 +500,15 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                 />
                 <Label htmlFor="available">Available for order</Label>
               </div>
-
-                <div className="sticky bottom-0 bg-background pt-4 pb-2 -mx-6 px-6 border-t mt-4">
-                  <div className="flex gap-2">
-                    <Button type="submit" className="flex-1">Add Item</Button>
-                    <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
               </form>
+            </div>
+            <div className="sticky bottom-0 bg-background border-t px-6 py-4 flex-shrink-0">
+              <div className="flex gap-2">
+                <Button type="submit" form="add-menu-item-form" className="flex-1">Add Item</Button>
+                <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
@@ -564,11 +563,11 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl max-h-[90vh] !flex !flex-col !grid-cols-none overflow-hidden p-0">
-                    <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0">
+                    <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 border-b">
                       <DialogTitle>Edit Menu Item</DialogTitle>
                     </DialogHeader>
-                    <div className="overflow-y-auto flex-1 px-6 min-h-0">
-                      <form onSubmit={handleSubmit} id="edit-menu-item-form" className="space-y-4 pb-4">
+                    <div className="overflow-y-auto flex-1 min-h-0 px-6 py-4">
+                      <form onSubmit={handleSubmit} id="edit-menu-item-form" className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="edit-name">Name *</Label>
@@ -882,16 +881,15 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                         />
                         <Label htmlFor="edit-available">Available for order</Label>
                       </div>
-
-                        <div className="sticky bottom-0 bg-background pt-4 pb-2 -mx-6 px-6 border-t mt-4">
-                          <div className="flex gap-2">
-                            <Button type="submit" className="flex-1">Save Changes</Button>
-                            <Button type="button" variant="outline" onClick={() => setEditingItem(null)}>
-                              Cancel
-                            </Button>
-                          </div>
-                        </div>
                       </form>
+                    </div>
+                    <div className="sticky bottom-0 bg-background border-t px-6 py-4 flex-shrink-0">
+                      <div className="flex gap-2">
+                        <Button type="submit" form="edit-menu-item-form" className="flex-1">Save Changes</Button>
+                        <Button type="button" variant="outline" onClick={() => setEditingItem(null)}>
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
                   </DialogContent>
                 </Dialog>
