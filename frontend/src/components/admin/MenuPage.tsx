@@ -35,6 +35,12 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
     category: 'Coffee',
     image: '',
     available: true,
+    customizations: {
+      size: { options: ['Small', 'Medium', 'Large'], default: 'Medium', enabled: false },
+      milk: { options: ['Whole', 'Skim', 'Oat', 'Almond', 'Soy'], default: 'Whole', enabled: false },
+      sugar: { options: ['None', '1', '2', '3', 'Extra'], default: 'None', enabled: false },
+      ice: { options: ['None', 'Light', 'Regular', 'Extra'], default: 'Regular', enabled: false },
+    },
   });
 
   const categories = Array.from(new Set(menuItems.map(item => item.category)));
@@ -50,6 +56,33 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
       return;
     }
 
+    // Build customizations object only with enabled options
+    const customizations: any = {};
+    if (formData.customizations.size.enabled) {
+      customizations.size = {
+        options: formData.customizations.size.options,
+        default: formData.customizations.size.default,
+      };
+    }
+    if (formData.customizations.milk.enabled) {
+      customizations.milk = {
+        options: formData.customizations.milk.options,
+        default: formData.customizations.milk.default,
+      };
+    }
+    if (formData.customizations.sugar.enabled) {
+      customizations.sugar = {
+        options: formData.customizations.sugar.options,
+        default: formData.customizations.sugar.default,
+      };
+    }
+    if (formData.customizations.ice.enabled) {
+      customizations.ice = {
+        options: formData.customizations.ice.options,
+        default: formData.customizations.ice.default,
+      };
+    }
+
     const itemData = {
       name: formData.name,
       description: formData.description,
@@ -57,6 +90,7 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
       category: formData.category,
       image: formData.image || 'https://images.unsplash.com/photo-1485808191679-5f86510681a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3ByZXNzbyUyMGNvZmZlZXxlbnwxfHx8fDE3NjA3OTg4MDB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
       available: formData.available,
+      customizations: Object.keys(customizations).length > 0 ? customizations : undefined,
     };
 
     if (editingItem) {
@@ -76,11 +110,18 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
       category: 'Coffee',
       image: '',
       available: true,
+      customizations: {
+        size: { options: ['Small', 'Medium', 'Large'], default: 'Medium', enabled: false },
+        milk: { options: ['Whole', 'Skim', 'Oat', 'Almond', 'Soy'], default: 'Whole', enabled: false },
+        sugar: { options: ['None', '1', '2', '3', 'Extra'], default: 'None', enabled: false },
+        ice: { options: ['None', 'Light', 'Regular', 'Extra'], default: 'Regular', enabled: false },
+      },
     });
   };
 
   const handleEdit = (item: MenuItem) => {
     setEditingItem(item);
+    const customizations = item.customizations || {};
     setFormData({
       name: item.name,
       description: item.description,
@@ -88,6 +129,28 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
       category: item.category,
       image: item.image,
       available: item.available ?? true,
+      customizations: {
+        size: {
+          options: customizations.size?.options || ['Small', 'Medium', 'Large'],
+          default: customizations.size?.default || 'Medium',
+          enabled: !!customizations.size,
+        },
+        milk: {
+          options: customizations.milk?.options || ['Whole', 'Skim', 'Oat', 'Almond', 'Soy'],
+          default: customizations.milk?.default || 'Whole',
+          enabled: !!customizations.milk,
+        },
+        sugar: {
+          options: customizations.sugar?.options || ['None', '1', '2', '3', 'Extra'],
+          default: customizations.sugar?.default || 'None',
+          enabled: !!customizations.sugar,
+        },
+        ice: {
+          options: customizations.ice?.options || ['None', 'Light', 'Regular', 'Extra'],
+          default: customizations.ice?.default || 'Regular',
+          enabled: !!customizations.ice,
+        },
+      },
     });
   };
 
@@ -179,6 +242,253 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                   placeholder="https://..."
                   className="mt-1"
                 />
+              </div>
+
+              {/* Customizations Section */}
+              <div className="space-y-4 border-t pt-4">
+                <Label className="text-base font-semibold">Customization Options</Label>
+                <p className="text-sm text-gray-600">Enable customization options that customers can choose when ordering</p>
+                
+                {/* Size */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.customizations.size.enabled}
+                      onCheckedChange={(checked) => setFormData({
+                        ...formData,
+                        customizations: {
+                          ...formData.customizations,
+                          size: { ...formData.customizations.size, enabled: checked },
+                        },
+                      })}
+                    />
+                    <Label>Size Options</Label>
+                  </div>
+                  {formData.customizations.size.enabled && (
+                    <div className="ml-8 space-y-2">
+                      <div className="flex gap-2 flex-wrap">
+                        {formData.customizations.size.options.map((opt, idx) => (
+                          <div key={idx} className="flex items-center gap-1">
+                            <Input
+                              value={opt}
+                              onChange={(e) => {
+                                const newOptions = [...formData.customizations.size.options];
+                                newOptions[idx] = e.target.value;
+                                setFormData({
+                                  ...formData,
+                                  customizations: {
+                                    ...formData.customizations,
+                                    size: { ...formData.customizations.size, options: newOptions },
+                                  },
+                                });
+                              }}
+                              className="w-24"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <Select
+                        value={formData.customizations.size.default}
+                        onValueChange={(value) => setFormData({
+                          ...formData,
+                          customizations: {
+                            ...formData.customizations,
+                            size: { ...formData.customizations.size, default: value },
+                          },
+                        })}
+                      >
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Default size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {formData.customizations.size.options.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Milk */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.customizations.milk.enabled}
+                      onCheckedChange={(checked) => setFormData({
+                        ...formData,
+                        customizations: {
+                          ...formData.customizations,
+                          milk: { ...formData.customizations.milk, enabled: checked },
+                        },
+                      })}
+                    />
+                    <Label>Milk Options</Label>
+                  </div>
+                  {formData.customizations.milk.enabled && (
+                    <div className="ml-8 space-y-2">
+                      <div className="flex gap-2 flex-wrap">
+                        {formData.customizations.milk.options.map((opt, idx) => (
+                          <Input
+                            key={idx}
+                            value={opt}
+                            onChange={(e) => {
+                              const newOptions = [...formData.customizations.milk.options];
+                              newOptions[idx] = e.target.value;
+                              setFormData({
+                                ...formData,
+                                customizations: {
+                                  ...formData.customizations,
+                                  milk: { ...formData.customizations.milk, options: newOptions },
+                                },
+                              });
+                            }}
+                            className="w-24"
+                          />
+                        ))}
+                      </div>
+                      <Select
+                        value={formData.customizations.milk.default}
+                        onValueChange={(value) => setFormData({
+                          ...formData,
+                          customizations: {
+                            ...formData.customizations,
+                            milk: { ...formData.customizations.milk, default: value },
+                          },
+                        })}
+                      >
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Default milk" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {formData.customizations.milk.options.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sugar */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.customizations.sugar.enabled}
+                      onCheckedChange={(checked) => setFormData({
+                        ...formData,
+                        customizations: {
+                          ...formData.customizations,
+                          sugar: { ...formData.customizations.sugar, enabled: checked },
+                        },
+                      })}
+                    />
+                    <Label>Sugar Options</Label>
+                  </div>
+                  {formData.customizations.sugar.enabled && (
+                    <div className="ml-8 space-y-2">
+                      <div className="flex gap-2 flex-wrap">
+                        {formData.customizations.sugar.options.map((opt, idx) => (
+                          <Input
+                            key={idx}
+                            value={opt}
+                            onChange={(e) => {
+                              const newOptions = [...formData.customizations.sugar.options];
+                              newOptions[idx] = e.target.value;
+                              setFormData({
+                                ...formData,
+                                customizations: {
+                                  ...formData.customizations,
+                                  sugar: { ...formData.customizations.sugar, options: newOptions },
+                                },
+                              });
+                            }}
+                            className="w-24"
+                          />
+                        ))}
+                      </div>
+                      <Select
+                        value={formData.customizations.sugar.default}
+                        onValueChange={(value) => setFormData({
+                          ...formData,
+                          customizations: {
+                            ...formData.customizations,
+                            sugar: { ...formData.customizations.sugar, default: value },
+                          },
+                        })}
+                      >
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Default sugar" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {formData.customizations.sugar.options.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Ice */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.customizations.ice.enabled}
+                      onCheckedChange={(checked) => setFormData({
+                        ...formData,
+                        customizations: {
+                          ...formData.customizations,
+                          ice: { ...formData.customizations.ice, enabled: checked },
+                        },
+                      })}
+                    />
+                    <Label>Ice Options</Label>
+                  </div>
+                  {formData.customizations.ice.enabled && (
+                    <div className="ml-8 space-y-2">
+                      <div className="flex gap-2 flex-wrap">
+                        {formData.customizations.ice.options.map((opt, idx) => (
+                          <Input
+                            key={idx}
+                            value={opt}
+                            onChange={(e) => {
+                              const newOptions = [...formData.customizations.ice.options];
+                              newOptions[idx] = e.target.value;
+                              setFormData({
+                                ...formData,
+                                customizations: {
+                                  ...formData.customizations,
+                                  ice: { ...formData.customizations.ice, options: newOptions },
+                                },
+                              });
+                            }}
+                            className="w-24"
+                          />
+                        ))}
+                      </div>
+                      <Select
+                        value={formData.customizations.ice.default}
+                        onValueChange={(value) => setFormData({
+                          ...formData,
+                          customizations: {
+                            ...formData.customizations,
+                            ice: { ...formData.customizations.ice, default: value },
+                          },
+                        })}
+                      >
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Default ice" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {formData.customizations.ice.options.map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
@@ -311,6 +621,252 @@ export function MenuPage({ menuItems, onAddItem, onUpdateItem, onDeleteItem, caf
                           onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                           className="mt-1"
                         />
+                      </div>
+
+                      {/* Customizations Section - Same as Add form */}
+                      <div className="space-y-4 border-t pt-4">
+                        <Label className="text-base font-semibold">Customization Options</Label>
+                        <p className="text-sm text-gray-600">Enable customization options that customers can choose when ordering</p>
+                        
+                        {/* Size */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={formData.customizations.size.enabled}
+                              onCheckedChange={(checked) => setFormData({
+                                ...formData,
+                                customizations: {
+                                  ...formData.customizations,
+                                  size: { ...formData.customizations.size, enabled: checked },
+                                },
+                              })}
+                            />
+                            <Label>Size Options</Label>
+                          </div>
+                          {formData.customizations.size.enabled && (
+                            <div className="ml-8 space-y-2">
+                              <div className="flex gap-2 flex-wrap">
+                                {formData.customizations.size.options.map((opt, idx) => (
+                                  <Input
+                                    key={idx}
+                                    value={opt}
+                                    onChange={(e) => {
+                                      const newOptions = [...formData.customizations.size.options];
+                                      newOptions[idx] = e.target.value;
+                                      setFormData({
+                                        ...formData,
+                                        customizations: {
+                                          ...formData.customizations,
+                                          size: { ...formData.customizations.size, options: newOptions },
+                                        },
+                                      });
+                                    }}
+                                    className="w-24"
+                                  />
+                                ))}
+                              </div>
+                              <Select
+                                value={formData.customizations.size.default}
+                                onValueChange={(value) => setFormData({
+                                  ...formData,
+                                  customizations: {
+                                    ...formData.customizations,
+                                    size: { ...formData.customizations.size, default: value },
+                                  },
+                                })}
+                              >
+                                <SelectTrigger className="w-48">
+                                  <SelectValue placeholder="Default size" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {formData.customizations.size.options.map((opt) => (
+                                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Milk */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={formData.customizations.milk.enabled}
+                              onCheckedChange={(checked) => setFormData({
+                                ...formData,
+                                customizations: {
+                                  ...formData.customizations,
+                                  milk: { ...formData.customizations.milk, enabled: checked },
+                                },
+                              })}
+                            />
+                            <Label>Milk Options</Label>
+                          </div>
+                          {formData.customizations.milk.enabled && (
+                            <div className="ml-8 space-y-2">
+                              <div className="flex gap-2 flex-wrap">
+                                {formData.customizations.milk.options.map((opt, idx) => (
+                                  <Input
+                                    key={idx}
+                                    value={opt}
+                                    onChange={(e) => {
+                                      const newOptions = [...formData.customizations.milk.options];
+                                      newOptions[idx] = e.target.value;
+                                      setFormData({
+                                        ...formData,
+                                        customizations: {
+                                          ...formData.customizations,
+                                          milk: { ...formData.customizations.milk, options: newOptions },
+                                        },
+                                      });
+                                    }}
+                                    className="w-24"
+                                  />
+                                ))}
+                              </div>
+                              <Select
+                                value={formData.customizations.milk.default}
+                                onValueChange={(value) => setFormData({
+                                  ...formData,
+                                  customizations: {
+                                    ...formData.customizations,
+                                    milk: { ...formData.customizations.milk, default: value },
+                                  },
+                                })}
+                              >
+                                <SelectTrigger className="w-48">
+                                  <SelectValue placeholder="Default milk" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {formData.customizations.milk.options.map((opt) => (
+                                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Sugar */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={formData.customizations.sugar.enabled}
+                              onCheckedChange={(checked) => setFormData({
+                                ...formData,
+                                customizations: {
+                                  ...formData.customizations,
+                                  sugar: { ...formData.customizations.sugar, enabled: checked },
+                                },
+                              })}
+                            />
+                            <Label>Sugar Options</Label>
+                          </div>
+                          {formData.customizations.sugar.enabled && (
+                            <div className="ml-8 space-y-2">
+                              <div className="flex gap-2 flex-wrap">
+                                {formData.customizations.sugar.options.map((opt, idx) => (
+                                  <Input
+                                    key={idx}
+                                    value={opt}
+                                    onChange={(e) => {
+                                      const newOptions = [...formData.customizations.sugar.options];
+                                      newOptions[idx] = e.target.value;
+                                      setFormData({
+                                        ...formData,
+                                        customizations: {
+                                          ...formData.customizations,
+                                          sugar: { ...formData.customizations.sugar, options: newOptions },
+                                        },
+                                      });
+                                    }}
+                                    className="w-24"
+                                  />
+                                ))}
+                              </div>
+                              <Select
+                                value={formData.customizations.sugar.default}
+                                onValueChange={(value) => setFormData({
+                                  ...formData,
+                                  customizations: {
+                                    ...formData.customizations,
+                                    sugar: { ...formData.customizations.sugar, default: value },
+                                  },
+                                })}
+                              >
+                                <SelectTrigger className="w-48">
+                                  <SelectValue placeholder="Default sugar" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {formData.customizations.sugar.options.map((opt) => (
+                                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Ice */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={formData.customizations.ice.enabled}
+                              onCheckedChange={(checked) => setFormData({
+                                ...formData,
+                                customizations: {
+                                  ...formData.customizations,
+                                  ice: { ...formData.customizations.ice, enabled: checked },
+                                },
+                              })}
+                            />
+                            <Label>Ice Options</Label>
+                          </div>
+                          {formData.customizations.ice.enabled && (
+                            <div className="ml-8 space-y-2">
+                              <div className="flex gap-2 flex-wrap">
+                                {formData.customizations.ice.options.map((opt, idx) => (
+                                  <Input
+                                    key={idx}
+                                    value={opt}
+                                    onChange={(e) => {
+                                      const newOptions = [...formData.customizations.ice.options];
+                                      newOptions[idx] = e.target.value;
+                                      setFormData({
+                                        ...formData,
+                                        customizations: {
+                                          ...formData.customizations,
+                                          ice: { ...formData.customizations.ice, options: newOptions },
+                                        },
+                                      });
+                                    }}
+                                    className="w-24"
+                                  />
+                                ))}
+                              </div>
+                              <Select
+                                value={formData.customizations.ice.default}
+                                onValueChange={(value) => setFormData({
+                                  ...formData,
+                                  customizations: {
+                                    ...formData.customizations,
+                                    ice: { ...formData.customizations.ice, default: value },
+                                  },
+                                })}
+                              >
+                                <SelectTrigger className="w-48">
+                                  <SelectValue placeholder="Default ice" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {formData.customizations.ice.options.map((opt) => (
+                                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex items-center gap-2">

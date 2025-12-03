@@ -20,15 +20,15 @@ export class MenusController {
   }
 
   @Post('items')
-  @ApiBody({ schema: { properties: { menuId: { type: 'number' }, name: { type: 'string' }, description: { type: 'string' }, price: { type: 'number' }, currency: { type: 'string' }, imageUrl: { type: 'string' } } } })
-  async addMenuItem(@Body() data: { menuId: number; name: string; description?: string; price: number; currency?: string; imageUrl?: string }) {
+  @ApiBody({ schema: { properties: { menuId: { type: 'number' }, name: { type: 'string' }, description: { type: 'string' }, price: { type: 'number' }, currency: { type: 'string' }, imageUrl: { type: 'string' }, category: { type: 'string' }, customizations: { type: 'object' } } } })
+  async addMenuItem(@Body() data: { menuId: number; name: string; description?: string; price: number; currency?: string; imageUrl?: string; category?: string; customizations?: any }) {
     return this.menusService.addMenuItem(data);
   }
 
   @Put('items/:id')
   @ApiParam({ name: 'id', type: Number })
-  @ApiBody({ schema: { properties: { name: { type: 'string' }, description: { type: 'string' }, price: { type: 'number' }, currency: { type: 'string' }, imageUrl: { type: 'string' } } } })
-  async updateMenuItem(@Param('id', ParseIntPipe) id: number, @Body() data: { name?: string; description?: string; price?: number; currency?: string; imageUrl?: string }) {
+  @ApiBody({ schema: { properties: { name: { type: 'string' }, description: { type: 'string' }, price: { type: 'number' }, currency: { type: 'string' }, imageUrl: { type: 'string' }, category: { type: 'string' }, customizations: { type: 'object' } } } })
+  async updateMenuItem(@Param('id', ParseIntPipe) id: number, @Body() data: { name?: string; description?: string; price?: number; currency?: string; imageUrl?: string; category?: string; customizations?: any }) {
     return this.menusService.updateMenuItem(id, data);
   }
 

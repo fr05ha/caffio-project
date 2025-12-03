@@ -18,10 +18,13 @@ export class CafesController {
       cafes = await this.cafesService.listSortedByRating();
     }
     // Add isOpen status to each cafe
-    return cafes.map(cafe => ({
-      ...cafe,
-      isOpen: this.cafesService.isCafeOpen(cafe.businessHours as any),
-    }));
+    return cafes.map(cafe => {
+      const isOpen = this.cafesService.isCafeOpen(cafe.businessHours as any);
+      return {
+        ...cafe,
+        isOpen,
+      };
+    });
   }
 
   @Get(':id')

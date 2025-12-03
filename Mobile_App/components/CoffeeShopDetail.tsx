@@ -128,18 +128,19 @@ export default function CoffeeShopDetail({
 
   const menuCategories = useMemo(() => {
     if (!cafe) return ['All'];
-    const names = cafe.menus.map((menu) => menu.name ?? 'Menu');
-    return ['All', ...names];
+    // Get unique categories from all menu items
+    const allItems = cafe.menus.flatMap((menu) => menu.items);
+    const categories = Array.from(new Set(allItems.map(item => item.category || 'Coffee')));
+    return ['All', ...categories.sort()];
   }, [cafe]);
 
   const visibleMenuItems = useMemo(() => {
     if (!cafe) return [];
+    const allItems = cafe.menus.flatMap((menu) => menu.items);
     if (selectedCategory === 'All') {
-      return cafe.menus.flatMap((menu) => menu.items);
+      return allItems;
     }
-    return cafe.menus
-      .filter((menu) => menu.name === selectedCategory)
-      .flatMap((menu) => menu.items);
+    return allItems.filter((item) => (item.category || 'Coffee') === selectedCategory);
   }, [cafe, selectedCategory]);
 
   const cartEntries = useMemo(() => Object.values(cart), [cart]);
@@ -334,7 +335,14 @@ export default function CoffeeShopDetail({
 
           <View style={styles.menuItemInfo}>
             <View style={styles.menuItemHeader}>
-              <Text style={styles.menuItemName}>{item.name}</Text>
+              <View style={styles.menuItemTitleRow}>
+                <Text style={styles.menuItemName}>{item.name}</Text>
+                {item.category && (
+                  <View style={styles.categoryBadge}>
+                    <Text style={styles.categoryBadgeText}>{item.category}</Text>
+                  </View>
+                )}
+              </View>
               {onToggleMenuItemFavorite && (
                 <TouchableOpacity
                   onPress={(e) => {
@@ -1314,13 +1322,34 @@ const styles = StyleSheet.create({
   menuItemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  menuItemTitleRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    flex: 1,
+    marginRight: 8,
   },
   menuItemName: {
     fontSize: 18,
     fontWeight: '600',
     color: '#5D4037',
-    marginBottom: 4,
+    marginRight: 8,
+  },
+  categoryBadge: {
+    backgroundColor: '#E8E0DD',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 2,
+  },
+  categoryBadgeText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#5D4037',
+    textTransform: 'capitalize',
   },
   menuItemFavoriteButton: {
     paddingLeft: 8,

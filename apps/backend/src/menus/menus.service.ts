@@ -18,7 +18,7 @@ export class MenusService {
     });
   }
 
-  async addMenuItem(data: { menuId: number; name: string; description?: string; price: number; currency?: string; imageUrl?: string }) {
+  async addMenuItem(data: { menuId: number; name: string; description?: string; price: number; currency?: string; imageUrl?: string; category?: string; customizations?: any }) {
     return this.db.menuItem.create({
       data: {
         menuId: data.menuId,
@@ -27,11 +27,13 @@ export class MenusService {
         price: data.price,
         currency: data.currency || 'AUD',
         imageUrl: data.imageUrl,
+        category: data.category || 'Coffee',
+        customizations: data.customizations || null,
       },
     });
   }
 
-  async updateMenuItem(id: number, data: { name?: string; description?: string; price?: number; currency?: string; imageUrl?: string }) {
+  async updateMenuItem(id: number, data: { name?: string; description?: string; price?: number; currency?: string; imageUrl?: string; category?: string; customizations?: any }) {
     return this.db.menuItem.update({
       where: { id },
       data: {
@@ -40,6 +42,8 @@ export class MenusService {
         ...(data.price && { price: data.price }),
         ...(data.currency && { currency: data.currency }),
         ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+        ...(data.category !== undefined && { category: data.category }),
+        ...(data.customizations !== undefined && { customizations: data.customizations }),
       },
     });
   }

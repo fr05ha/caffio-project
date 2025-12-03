@@ -58,6 +58,7 @@ export default function App() {
           image: item.imageUrl || 'https://images.unsplash.com/photo-1485808191679-5f86510681a2',
           category: item.category || 'Coffee',
           available: true,
+          customizations: item.customizations || undefined,
         }));
         
         // Always set menu items (even if empty) to ensure clean state
@@ -179,6 +180,8 @@ export default function App() {
         description: item.description,
         price: item.price,
         imageUrl: item.image, // Send image URL to backend
+        category: item.category,
+        customizations: item.customizations,
       });
       const mapped: MenuItem = {
         id: String(created.id),
@@ -186,8 +189,9 @@ export default function App() {
         description: created.description || '',
         price: created.price,
         image: created.imageUrl || item.image, // Use imageUrl from backend response
-        category: item.category,
+        category: created.category || item.category,
         available: item.available,
+        customizations: created.customizations || item.customizations,
       };
       setMenuItems([...menuItems, mapped]);
       toast.success('Menu item added successfully');
@@ -206,6 +210,8 @@ export default function App() {
           description: updates.description,
           price: updates.price,
           imageUrl: updates.image, // Send image URL to backend
+          category: updates.category,
+          customizations: updates.customizations,
         });
       }
       setMenuItems(menuItems.map((item: MenuItem) =>

@@ -50,6 +50,14 @@ export interface MenuItem {
   price: number;
   currency: string;
   imageUrl?: string;
+  category?: string;
+  customizations?: {
+    size?: { options: string[]; default?: string };
+    milk?: { options: string[]; default?: string };
+    sugar?: { options: string[]; default?: string };
+    ice?: { options: string[]; default?: string };
+    [key: string]: any;
+  };
 }
 
 export interface Review {

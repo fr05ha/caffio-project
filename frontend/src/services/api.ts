@@ -57,6 +57,7 @@ export type MenuItemDto = {
   currency?: string | null;
   imageUrl?: string | null;
   category?: string | null;
+  customizations?: any | null;
 };
 
 export type MenuDto = {
@@ -146,10 +147,10 @@ export const api = {
   createMenu(data: { cafeId: number; name?: string }): Promise<MenuDto> {
     return http('/menus', { method: 'POST', body: JSON.stringify(data) });
   },
-  addMenuItem(data: { menuId: number; name: string; description?: string; price: number; currency?: string; imageUrl?: string }): Promise<MenuItemDto> {
+  addMenuItem(data: { menuId: number; name: string; description?: string; price: number; currency?: string; imageUrl?: string; category?: string; customizations?: any }): Promise<MenuItemDto> {
     return http('/menus/items', { method: 'POST', body: JSON.stringify(data) });
   },
-  updateMenuItem(id: number, data: { name?: string; description?: string; price?: number; currency?: string; imageUrl?: string }): Promise<MenuItemDto> {
+  updateMenuItem(id: number, data: { name?: string; description?: string; price?: number; currency?: string; imageUrl?: string; category?: string; customizations?: any }): Promise<MenuItemDto> {
     return http(`/menus/items/${id}`, { method: 'PUT', body: JSON.stringify(data) });
   },
   deleteMenuItem(id: number): Promise<void> {

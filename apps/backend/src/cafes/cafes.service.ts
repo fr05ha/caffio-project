@@ -91,9 +91,10 @@ export class CafesService {
 
   isCafeOpen(businessHours: any): boolean {
     try {
-      // Handle null, undefined, or empty values - default to closed if not set
+      // Handle null, undefined, or empty values - default to open if not set
+      // This is safer for existing cafes that may not have business hours configured
       if (!businessHours) {
-        return false; // Closed if business hours not configured
+        return true; // Open by default if business hours not configured
       }
 
       // Handle Prisma JSON type - it might be a string that needs parsing
@@ -101,14 +102,15 @@ export class CafesService {
       if (typeof businessHours === 'string') {
         try {
           hours = JSON.parse(businessHours);
-        } catch {
-          return false; // Closed if parsing fails
+        } catch (e) {
+          console.warn('Failed to parse businessHours JSON:', e);
+          return true; // Open by default if parsing fails
         }
       }
 
       // Check if hours is an object (not null, not array, not primitive)
       if (typeof hours !== 'object' || hours === null || Array.isArray(hours)) {
-        return false; // Closed if invalid format
+        return true; // Open by default if invalid format
       }
 
       const now = new Date();
@@ -118,8 +120,13 @@ export class CafesService {
       const dayHours = hours[dayName];
 
       // If day is not configured or not enabled, cafe is closed
-      if (!dayHours || typeof dayHours !== 'object' || dayHours.enabled !== true) {
-        return false;
+      if (!dayHours || typeof dayHours !== 'object') {
+        return false; // Closed if day not configured
+      }
+
+      // Check if day is enabled
+      if (dayHours.enabled !== true && dayHours.enabled !== 'true') {
+        return false; // Closed if day is disabled
       }
 
       // Parse open and close times
@@ -156,8 +163,8 @@ export class CafesService {
         return currentTime >= openTime && currentTime < closeTime;
       }
     } catch (error) {
-      console.error('Error calculating isCafeOpen:', error);
-      return false; // Default to closed on error
+      console.error('Error calculating isCafeOpen:', error, 'businessHours:', businessHours);
+      return true; // Default to open on error to avoid false negatives
     }
   }
 }

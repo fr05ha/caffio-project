@@ -53,16 +53,18 @@ model Menu {
 }
 
 model MenuItem {
-  id          Int                        @id @default(autoincrement())
-  menuId      Int
-  name        String
-  description String?
-  price       Float
-  currency    String                     @default("AUD")
-  imageUrl    String?
-  favoritedBy CustomerFavoriteMenuItem[]
-  orderItems  OrderItem[]
-  menu        Menu                       @relation(fields: [menuId], references: [id])
+  id            Int                        @id @default(autoincrement())
+  menuId        Int
+  name          String
+  description   String?
+  price         Float
+  currency      String                     @default("AUD")
+  imageUrl      String?
+  category      String                     @default("Coffee")
+  customizations Json?                     // Store customization options (size, milk, sugar, ice, etc.)
+  favoritedBy   CustomerFavoriteMenuItem[]
+  orderItems    OrderItem[]
+  menu          Menu                       @relation(fields: [menuId], references: [id])
 }
 
 model Review {

@@ -83,54 +83,168 @@ export default function MenuItemDetail({
 }: MenuItemDetailProps) {
   const [quantity, setQuantity] = useState(1);
   
-  // Determine which customizations to show based on item name/description
-  const isCoffee = item.name.toLowerCase().includes('coffee') || 
+  // Use customizations from API if available, otherwise use defaults based on item type
+  const hasCustomizations = item.customizations && Object.keys(item.customizations).length > 0;
+  const isCoffee = item.category === 'Coffee' || 
+                   item.name.toLowerCase().includes('coffee') || 
                    item.name.toLowerCase().includes('latte') ||
                    item.name.toLowerCase().includes('cappuccino') ||
                    item.name.toLowerCase().includes('espresso') ||
                    item.name.toLowerCase().includes('americano') ||
                    item.name.toLowerCase().includes('mocha');
 
-  const [customizations, setCustomizations] = useState<Record<string, string | undefined>>({
-    size: 'medium',
-    milk: isCoffee ? 'whole' : undefined,
-    sugar: isCoffee ? 'normal' : undefined,
-    ice: item.name.toLowerCase().includes('iced') || item.name.toLowerCase().includes('cold') ? 'normal' : undefined,
-  });
+  // Initialize customizations from API or use defaults
+  const getInitialCustomizations = (): Record<string, string | undefined> => {
+    if (hasCustomizations && item.customizations) {
+      const result: Record<string, string | undefined> = {};
+      if (item.customizations.size) {
+        result.size = item.customizations.size.default || item.customizations.size.options[0] || 'medium';
+      }
+      if (item.customizations.milk) {
+        result.milk = item.customizations.milk.default || item.customizations.milk.options[0] || 'whole';
+      }
+      if (item.customizations.sugar) {
+        result.sugar = item.customizations.sugar.default || item.customizations.sugar.options[0] || 'normal';
+      }
+      if (item.customizations.ice) {
+        result.ice = item.customizations.ice.default || item.customizations.ice.options[0] || 'normal';
+      }
+      return result;
+    }
+    // Fallback to defaults
+    return {
+      size: 'medium',
+      milk: isCoffee ? 'whole' : undefined,
+      sugar: isCoffee ? 'normal' : undefined,
+      ice: item.name.toLowerCase().includes('iced') || item.name.toLowerCase().includes('cold') ? 'normal' : undefined,
+    };
+  };
 
-  const customizationGroups: CustomizationGroup[] = [
-    {
-      id: 'size',
-      title: 'Size',
-      required: true,
-      options: SIZE_OPTIONS,
-      selected: customizations.size,
-    },
-    ...(isCoffee ? [{
-      id: 'milk',
-      title: 'Milk Type',
-      required: false,
-      options: MILK_OPTIONS,
-      selected: customizations.milk,
-    }] : []),
-    ...(isCoffee ? [{
-      id: 'sugar',
-      title: 'Sugar',
-      required: false,
-      options: SUGAR_OPTIONS,
-      selected: customizations.sugar,
-    }] : []),
-    ...(customizations.ice !== undefined ? [{
-      id: 'ice',
-      title: 'Ice',
-      required: false,
-      options: ICE_OPTIONS,
-      selected: customizations.ice,
-    }] : []),
-  ].map((group) => ({
-    ...group,
-    selected: customizations[group.id],
-  }));
+  const [customizations, setCustomizations] = useState<Record<string, string | undefined>>(getInitialCustomizations());
+
+  // Build customization groups from API data or use defaults
+  const buildCustomizationGroups = (): CustomizationGroup[] => {
+    const groups: CustomizationGroup[] = [];
+    
+    if (hasCustomizations && item.customizations) {
+      // Use API customizations
+      if (item.customizations.size) {
+        groups.push({
+          id: 'size',
+          title: 'Size',
+          required: true,
+          options: item.customizations.size.options.map(opt => {
+            const defaultOption = SIZE_OPTIONS.find(s => s.name.toLowerCase() === opt.toLowerCase());
+            return {
+              id: opt.toLowerCase().replace(/\s+/g, '_'),
+              name: opt,
+              price: defaultOption?.price || 0,
+              icon: defaultOption?.icon || 'radio-button-on',
+            };
+          }),
+          selected: customizations.size,
+        });
+      }
+      
+      if (item.customizations.milk) {
+        groups.push({
+          id: 'milk',
+          title: 'Milk Type',
+          required: false,
+          options: item.customizations.milk.options.map(opt => {
+            const defaultOption = MILK_OPTIONS.find(m => m.name.toLowerCase().includes(opt.toLowerCase()));
+            return {
+              id: opt.toLowerCase().replace(/\s+/g, '_'),
+              name: opt,
+              price: defaultOption?.price || 0,
+              icon: defaultOption?.icon || 'water',
+            };
+          }),
+          selected: customizations.milk,
+        });
+      }
+      
+      if (item.customizations.sugar) {
+        groups.push({
+          id: 'sugar',
+          title: 'Sugar',
+          required: false,
+          options: item.customizations.sugar.options.map(opt => {
+            const defaultOption = SUGAR_OPTIONS.find(s => s.name.toLowerCase().includes(opt.toLowerCase()));
+            return {
+              id: opt.toLowerCase().replace(/\s+/g, '_'),
+              name: opt,
+              price: defaultOption?.price || 0,
+              icon: defaultOption?.icon || 'radio-button-on',
+            };
+          }),
+          selected: customizations.sugar,
+        });
+      }
+      
+      if (item.customizations.ice) {
+        groups.push({
+          id: 'ice',
+          title: 'Ice',
+          required: false,
+          options: item.customizations.ice.options.map(opt => {
+            const defaultOption = ICE_OPTIONS.find(i => i.name.toLowerCase().includes(opt.toLowerCase()));
+            return {
+              id: opt.toLowerCase().replace(/\s+/g, '_'),
+              name: opt,
+              price: defaultOption?.price || 0,
+              icon: defaultOption?.icon || 'snow',
+            };
+          }),
+          selected: customizations.ice,
+        });
+      }
+    } else {
+      // Use default customizations based on item type
+      groups.push({
+        id: 'size',
+        title: 'Size',
+        required: true,
+        options: SIZE_OPTIONS,
+        selected: customizations.size,
+      });
+      
+      if (isCoffee) {
+        groups.push({
+          id: 'milk',
+          title: 'Milk Type',
+          required: false,
+          options: MILK_OPTIONS,
+          selected: customizations.milk,
+        });
+        
+        groups.push({
+          id: 'sugar',
+          title: 'Sugar',
+          required: false,
+          options: SUGAR_OPTIONS,
+          selected: customizations.sugar,
+        });
+      }
+      
+      if (customizations.ice !== undefined) {
+        groups.push({
+          id: 'ice',
+          title: 'Ice',
+          required: false,
+          options: ICE_OPTIONS,
+          selected: customizations.ice,
+        });
+      }
+    }
+    
+    return groups.map((group) => ({
+      ...group,
+      selected: customizations[group.id],
+    }));
+  };
+
+  const customizationGroups = buildCustomizationGroups();
 
   const calculateTotalPrice = (): number => {
     let total = item.price;
